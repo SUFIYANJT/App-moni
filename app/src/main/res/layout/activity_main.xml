@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#e1d2d2"
     tools:context=".MainActivity">
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -21,12 +22,12 @@
         android:layout_height="wrap_content"
         android:id="@+id/toolbar"
         android:title="Travancore Cements"
-        android:titleTextColor="@color/white"
+        android:titleTextColor="@color/black"
         app:layout_constraintTop_toTopOf="parent"
+        android:background="#e1d2d2"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/tablayout"
-        android:background="#6750A4"
         />
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -40,7 +41,7 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tablayout"
         android:layout_width="407dp"
-
+        android:background="#e1d2d2"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,6 +77,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constrainedHeight="true"
+        android:background="#e1d2d2"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tablayout"
@@ -88,6 +90,7 @@
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="#e1d2d2"
         app:layout_constraintTop_toBottomOf="@+id/searchBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
