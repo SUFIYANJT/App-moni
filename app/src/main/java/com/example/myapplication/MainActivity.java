@@ -10,7 +10,7 @@ import com.google.android.material.tabs.TabLayout;
 
 
 public class MainActivity extends AppCompatActivity {
-
+    public static String TAG1="debug log";
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private FloatingActionButton fab;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 // Check the position of the selected fragment and update FAB visibility
                 if (position == 3) { // Assuming InspectorReview is at position 3
-                    fab.setVisibility(View.GONE);
+                    fab.setVisibility(View.INVISIBLE);
                 } else {
                     fab.setVisibility(View.VISIBLE);
                 }

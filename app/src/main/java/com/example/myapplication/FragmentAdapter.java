@@ -1,5 +1,9 @@
 package com.example.myapplication;
 
+import static com.example.myapplication.MainActivity.TAG1;
+
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -23,6 +27,7 @@ public class FragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
+        Log.d(TAG1, "getCount: "+fragmentArrayLis.size());
         return fragmentArrayLis.size();
     }
     public void addFragment(Fragment fragment,String title){
