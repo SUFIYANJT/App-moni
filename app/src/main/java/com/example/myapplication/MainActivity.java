@@ -7,23 +7,25 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
-
+import androidx.appcompat.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity {
-    public static String TAG1="debug log";
+
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private FloatingActionButton fab;
     private BottomSheetFragment bottomSheetFragment;
+    private SearchView searchView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        searchView = findViewById(R.id.search_view);
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.viewPager);
-
         fab = findViewById(R.id.fab);
 
         FragmentAdapter fragmentAdapter = new FragmentAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
@@ -67,6 +69,23 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageScrollStateChanged(int state) {
                 // Not needed for this example
+            }
+        });
+
+        // Set a listener for the search view
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // Handle search query submission
+                // Perform search or filter logic here
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Handle search query text change
+                // Perform filtering or update logic here
+                return true;
             }
         });
     }

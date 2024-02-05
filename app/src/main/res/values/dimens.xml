@@ -1,0 +1,4 @@
+<!-- dimens.xml -->
+<resources>
+    <dimen name="card_corner_radius">8dp</dimen>
+</resources>
