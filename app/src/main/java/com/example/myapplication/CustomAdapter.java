@@ -3,22 +3,26 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
-
 import com.example.myapplication.model.ItemModel;
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
+import java.util.ArrayList;
+import java.util.List;
 
-    public final List<ItemModel> dataList;
+public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> implements Filterable {
 
+    private final List<ItemModel> dataList;
+    private final List<ItemModel> dataListFull;  // Backup of original data
 
     public CustomAdapter(List<ItemModel> dataList) {
         this.dataList = dataList;
+        this.dataListFull = new ArrayList<>(dataList);
     }
 
     @NonNull
@@ -47,5 +51,38 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             super(itemView);
             textView = itemView.findViewById(R.id.textView);
         }
+    }
+
+    // Filter logic for search functionality
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String query = charSequence.toString().toLowerCase().trim();
+                List<ItemModel> filteredList = new ArrayList<>();
+
+                if (query.isEmpty()) {
+                    filteredList.addAll(dataListFull);
+                } else {
+                    for (ItemModel item : dataListFull) {
+                        if (item.getItemName().toLowerCase().contains(query)) {
+                            filteredList.add(item);
+                        }
+                    }
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                dataList.clear();
+                dataList.addAll((List<ItemModel>) filterResults.values);
+                notifyDataSetChanged();
+            }
+        };
     }
 }

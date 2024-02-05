@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#e1d2d2"
+    android:background="#FFFFFFFF"
     tools:context=".MainActivity">
 
     <!-- FloatingActionButton -->
@@ -26,8 +26,8 @@
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#e1d2d2"
-        app:titleTextColor="@color/black"
+        android:background="#6750a4"
+        app:titleTextColor="#FFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/tablayout">
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Travancore Cements"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"/>
         <androidx.appcompat.widget.SearchView
@@ -51,7 +51,7 @@
             android:hint="Search activity here"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintBottom_toTopOf="@+id/viewPager"
-            android:background="#e1d2d2" />
+            android:background="#6750a4" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 
@@ -63,7 +63,7 @@
         android:id="@+id/tablayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="#e1d2d2"
+        android:background="#FFFFFFFF"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -103,7 +103,7 @@
         android:hint="Search activity here"
         app:layout_constraintVertical_bias="0"
         app:layout_constraintBottom_toTopOf="@+id/viewPager"
-        android:background="#e1d2d2" />
+        android:background="#6750a4" />
 
     <!-- RecyclerView -->
 
@@ -113,7 +113,7 @@
         android:id="@+id/viewPager"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#e1d2d2"
+        android:background="#FFFFFFFF"
         app:layout_constraintTop_toBottomOf="@+id/searchBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
