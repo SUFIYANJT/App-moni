@@ -3,6 +3,7 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -52,18 +53,25 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             }
         });
 
-
-
-        // Set progress visibility based on the current fragment
-        if (isPendingActivity) {
-            holder.linearProgressIndicator.setVisibility(View.VISIBLE);
-            // Set progress (value between 0 and 1)
-            holder.linearProgressIndicator.setProgress(1); // Example: 50%
-        } else {
+        if (isInspecterReview) {
+            // For inspector review, show only the image view
+            holder.imageView.setVisibility(View.VISIBLE);
             holder.linearProgressIndicator.setVisibility(View.GONE);
+        } else {
+            // For other cases, show both image view and linear progress indicator
+            holder.imageView.setVisibility(View.GONE);
+            holder.linearProgressIndicator.setVisibility(View.VISIBLE);
+
+            // Set progress visibility based on the current fragment
+            if (isPendingActivity) {
+                holder.linearProgressIndicator.setVisibility(View.VISIBLE);
+                // Set progress (value between 0 and 1)
+                holder.linearProgressIndicator.setProgress(50); // Example: 50%
+            } else {
+                holder.linearProgressIndicator.setVisibility(View.GONE);
+            }
         }
     }
-
     @Override
     public int getItemCount() {
         return itemList.size();
@@ -73,12 +81,15 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         TextView textView;
         CardView cardView;
         LinearProgressIndicator linearProgressIndicator;
+        ImageView imageView;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            cardView = itemView.findViewById(R.id.cardView);
             textView = itemView.findViewById(R.id.textView);
             cardView = itemView.findViewById(R.id.cardView);
             linearProgressIndicator = itemView.findViewById(R.id.linear_progress_indicator);
+            imageView = itemView.findViewById(R.id.imageView);
         }
     }
 }

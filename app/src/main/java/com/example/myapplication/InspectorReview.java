@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,8 @@ public class InspectorReview extends Fragment {
         // Create dummy data
         List<ItemModel> itemList = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            ItemModel itemModel=new ItemModel();
-            itemModel.setItemName("item "+i);
+            ItemModel itemModel = new ItemModel();
+            itemModel.setItemName("item " + i);
             itemList.add(itemModel);
         }
 
@@ -39,11 +39,18 @@ public class InspectorReview extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // Pass false for isPendingActivity as it's InspectorReview
-        CustomAdapter customAdapter = new CustomAdapter(itemList, false,true);
-
+        CustomAdapter customAdapter = new CustomAdapter(itemList, false, true);
         recyclerView.setAdapter(customAdapter);
 
-        // Your InspectorReview fragment logic goes here
+        // Set item click listener
+        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(ItemModel item) {
+                // Start WhitePageActivity when CardView is clicked
+                Intent intent = new Intent(requireContext(), NewWindow.class);
+                startActivity(intent);
+            }
+        });
 
         return view;
     }
