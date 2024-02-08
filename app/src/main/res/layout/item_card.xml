@@ -1,28 +1,56 @@
-<!-- item_card.xml -->
-<LinearLayout
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp"
-    app:background="@color/cardBackgroundColor">
+    android:layout_margin="8dp"
+    android:background="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="2dp"
-        app:cardCornerRadius="8dp"
-        android:background="#403161" >
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/baseline_playlist_add_24"
+            android:background="@drawable/circular_background" />
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:padding="16dp"
-            android:textColor="#403161"/>
-    </com.google.android.material.card.MaterialCardView>
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linear_progress_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:indicatorColor="@color/progress_indicator_color"
+        app:indicatorSize="3dp"
+        app:trackColor="@color/progress_track_color"
+        app:trackCornerRadius="16dp"
+        app:trackThickness="5dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="5dp" />
+</com.google.android.material.card.MaterialCardView>

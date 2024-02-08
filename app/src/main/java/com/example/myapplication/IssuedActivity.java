@@ -12,27 +12,31 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.model.ItemModel;
 
 import java.util.ArrayList;
-import java.util.List; // Add this import statement
+import java.util.List;
 
 public class IssuedActivity extends Fragment {
 
     @Override
-    
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.fragment_issued_activity, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_issued_activity, container, false);
 
-            // Create dummy data
-            List<ItemModel> itemList = new ArrayList<>();
-            for (int i = 1; i <= 10; i++) {
-                itemList.add(new ItemModel("Item " + i));
-            }
-
-            // Set up RecyclerView
-            RecyclerView recyclerView = view.findViewById(R.id.recyclerViewIss);
-            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-            CustomAdapter customAdapter = new CustomAdapter(itemList);
-            recyclerView.setAdapter(customAdapter);
-
-            return view;
+        // Create dummy data
+        List<ItemModel> itemList = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            ItemModel itemModel = new ItemModel();
+            itemModel.setItemName("item " + i);
+            itemList.add(itemModel);
         }
+
+        // Set up RecyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewIss);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        // Pass true for isInspecterReview and false for isPendingActivity
+        CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
+
+        recyclerView.setAdapter(customAdapter);
+
+        return view;
     }
+}

@@ -1,13 +1,29 @@
 package com.example.myapplication.model;
 
 public class ItemModel {
-    private final String itemName;
+    private String name;
+    private String description;
+    private int id;
+    private int status_id;
+    private int imageResource;
 
-    public ItemModel(String itemName) {
-        this.itemName = itemName;
+    public void setItemName(String itemName) {
+        this.name = itemName;
+    }
+
+    public ItemModel() {
+
+    }
+    public int getImageResource() {
+        return imageResource;
+    }
+
+    public void setImageResource(int imageResource) {
+        this.imageResource = imageResource;
     }
 
     public String getItemName() {
-        return itemName;
+        return name;
     }
+
 }

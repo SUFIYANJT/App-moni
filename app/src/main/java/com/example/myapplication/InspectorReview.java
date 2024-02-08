@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +26,25 @@ public class InspectorReview extends Fragment {
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
         fab.setVisibility(View.GONE);
 
-            // Create dummy data
-            List<ItemModel> itemList = new ArrayList<>();
-            for (int i = 1; i <= 10; i++) {
-                itemList.add(new ItemModel("Item " + i));
-            }
+        // Create dummy data
+        List<ItemModel> itemList = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            ItemModel itemModel=new ItemModel();
+            itemModel.setItemName("item "+i);
+            itemList.add(itemModel);
+        }
 
-            // Set up RecyclerView
-            RecyclerView recyclerView = view.findViewById(R.id.recyclerViewins);
-            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-            CustomAdapter customAdapter = new CustomAdapter(itemList);
-            recyclerView.setAdapter(customAdapter);
+        // Set up RecyclerView
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewins);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-            return view;
+        // Pass false for isPendingActivity as it's InspectorReview
+        CustomAdapter customAdapter = new CustomAdapter(itemList, false,true);
+
+        recyclerView.setAdapter(customAdapter);
+
         // Your InspectorReview fragment logic goes here
 
+        return view;
     }
 }

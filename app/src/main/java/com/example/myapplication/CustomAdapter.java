@@ -3,86 +3,82 @@ package com.example.myapplication;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.R;
 import com.example.myapplication.model.ItemModel;
-
-import java.util.ArrayList;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.util.List;
 
-public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> implements Filterable {
+public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
+    private List<ItemModel> itemList;
+    private OnItemClickListener listener;
+    private boolean isPendingActivity;
+    private boolean isInspecterReview;
+    public CustomAdapter(List<ItemModel> itemList, boolean isPendingActivity,boolean isInspecterReview) {
+        this.itemList = itemList;
+        this.isPendingActivity = isPendingActivity;
+        this.isInspecterReview= isInspecterReview;
+    }
 
-    private final List<ItemModel> dataList;
-    private final List<ItemModel> dataListFull;  // Backup of original data
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
 
-    public CustomAdapter(List<ItemModel> dataList) {
-        this.dataList = dataList;
-        this.dataListFull = new ArrayList<>(dataList);
+    public interface OnItemClickListener {
+        void onItemClick(ItemModel item);
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_card, parent, false);
-        return new ViewHolder(view);
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_card, parent, false);
+        return new ViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ItemModel item = dataList.get(position);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        ItemModel item = itemList.get(position);
         holder.textView.setText(item.getItemName());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
+            }
+        });
+
+
+
+        // Set progress visibility based on the current fragment
+        if (isPendingActivity) {
+            holder.linearProgressIndicator.setVisibility(View.VISIBLE);
+            // Set progress (value between 0 and 1)
+            holder.linearProgressIndicator.setProgress(1); // Example: 50%
+        } else {
+            holder.linearProgressIndicator.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return itemList.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
+        CardView cardView;
+        LinearProgressIndicator linearProgressIndicator;
 
-        ViewHolder(@NonNull View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
             textView = itemView.findViewById(R.id.textView);
+            cardView = itemView.findViewById(R.id.cardView);
+            linearProgressIndicator = itemView.findViewById(R.id.linear_progress_indicator);
         }
-    }
-
-    // Filter logic for search functionality
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                String query = charSequence.toString().toLowerCase().trim();
-                List<ItemModel> filteredList = new ArrayList<>();
-
-                if (query.isEmpty()) {
-                    filteredList.addAll(dataListFull);
-                } else {
-                    for (ItemModel item : dataListFull) {
-                        if (item.getItemName().toLowerCase().contains(query)) {
-                            filteredList.add(item);
-                        }
-                    }
-                }
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
-                return filterResults;
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                dataList.clear();
-                dataList.addAll((List<ItemModel>) filterResults.values);
-                notifyDataSetChanged();
-            }
-        };
     }
 }

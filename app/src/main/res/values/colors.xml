@@ -1,7 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
     <color name="black">#000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="status">#6750a4</color>
     <color name="cardBackgroundColor">#e1d2d2</color>
+    <color name="progress_track_color">#6750a4</color>
+    <color name="progress_indicator_color">#FFFFFFFF</color>
 </resources>
