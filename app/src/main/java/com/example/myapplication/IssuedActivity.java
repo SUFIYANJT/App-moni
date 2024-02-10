@@ -20,6 +20,7 @@ public class IssuedActivity extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_issued_activity, container, false);
 
+
         // Create dummy data
         List<ItemModel> itemList = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
@@ -34,8 +35,17 @@ public class IssuedActivity extends Fragment {
 
         // Pass true for isInspecterReview and false for isPendingActivity
         CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
-
         recyclerView.setAdapter(customAdapter);
+
+        // Set item click listener
+        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(ItemModel item) {
+                // Show popup window
+                BottomSheetDialogFragmentIssued bottomSheetFragment = new BottomSheetDialogFragmentIssued();
+                bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
+            }
+        });
 
         return view;
     }

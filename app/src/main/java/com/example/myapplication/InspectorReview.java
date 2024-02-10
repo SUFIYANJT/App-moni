@@ -46,7 +46,7 @@ public class InspectorReview extends Fragment {
         customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(ItemModel item) {
-                // Start WhitePageActivity when CardView is clicked
+                // Start NewWindow activity when CardView is clicked
                 Intent intent = new Intent(requireContext(), NewWindow.class);
                 startActivity(intent);
             }

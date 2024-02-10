@@ -23,6 +23,7 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.bottom_sheet_layout_exixting, container, false);
 
+
         // Initialize views and buttons
         Button button1 = view.findViewById(R.id.confirmButton1);
 

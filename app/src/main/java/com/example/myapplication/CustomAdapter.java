@@ -5,13 +5,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.R;
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+
 import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
@@ -19,10 +20,11 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     private OnItemClickListener listener;
     private boolean isPendingActivity;
     private boolean isInspecterReview;
-    public CustomAdapter(List<ItemModel> itemList, boolean isPendingActivity,boolean isInspecterReview) {
+
+    public CustomAdapter(List<ItemModel> itemList, boolean isPendingActivity, boolean isInspecterReview) {
         this.itemList = itemList;
         this.isPendingActivity = isPendingActivity;
-        this.isInspecterReview= isInspecterReview;
+        this.isInspecterReview = isInspecterReview;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -35,13 +37,13 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_card, parent, false);
         return new ViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ItemModel item = itemList.get(position);
         holder.textView.setText(item.getItemName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +74,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             }
         }
     }
+
     @Override
     public int getItemCount() {
         return itemList.size();
@@ -83,11 +86,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         LinearProgressIndicator linearProgressIndicator;
         ImageView imageView;
 
-        public ViewHolder(View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
             cardView = itemView.findViewById(R.id.cardView);
             textView = itemView.findViewById(R.id.textView);
-            cardView = itemView.findViewById(R.id.cardView);
             linearProgressIndicator = itemView.findViewById(R.id.linear_progress_indicator);
             imageView = itemView.findViewById(R.id.imageView);
         }

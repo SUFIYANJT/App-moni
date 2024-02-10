@@ -50,7 +50,7 @@
         app:trackColor="@color/progress_indicator_color"
         app:trackCornerRadius="16dp"
         app:trackThickness="5dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="5dp" />
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="9dp" />
 </com.google.android.material.card.MaterialCardView>
