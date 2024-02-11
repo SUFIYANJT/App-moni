@@ -15,9 +15,11 @@ public class UsercardWindow extends AppCompatActivity {
         // Assuming you have a MaterialButton with the id menu_button1
         MaterialButton backButton = findViewById(R.id.back_buttonuserwindow);
 
+
         // Set click listener for the back button
         backButton.setOnClickListener(v -> {
             Intent intent = new Intent(UsercardWindow.this, newmainuser.class);
+
 
             startActivity(intent);
             finish();
