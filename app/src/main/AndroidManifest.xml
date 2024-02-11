@@ -1,5 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.myapplication">
+
+    <!-- Permissions should be declared outside of the application tag -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Declaration for camera hardware feature -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.mic" />
+
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Declaration for camera hardware feature -->
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
+
 
     <application
         android:allowBackup="true"
