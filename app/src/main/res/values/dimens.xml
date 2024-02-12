@@ -1,6 +1,6 @@
-
-<!-- dimens.xml -->
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="card_corner_radius">8dp</dimen>
-
+    <!-- Define the fixed dimensions for the attached image view -->
+    <dimen name="attached_image_width">200dp</dimen>
+    <dimen name="attached_image_height">200dp</dimen>
 </resources>

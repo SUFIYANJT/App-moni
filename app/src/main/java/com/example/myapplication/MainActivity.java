@@ -2,16 +2,23 @@ package com.example.myapplication;
 
 import static android.widget.Toast.makeText;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 import static androidx.core.content.ContentProviderCompat.requireContext;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
@@ -20,8 +27,9 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.search.SearchBar;
+import com.google.android.material.search.SearchView;
 import com.google.android.material.tabs.TabLayout;
-import androidx.appcompat.widget.SearchView;
 import com.google.android.material.button.MaterialButton;
  // Import MaterialButton
 
@@ -32,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private BottomSheetFragment bottomSheetFragment;
     private SearchView searchView;
+    private SearchBar searchBar;
     private MaterialButton menuButton; // Define MaterialButton for the menu
 
     @Override
@@ -43,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.viewPager);
         fab = findViewById(R.id.fab);
-        menuButton = findViewById(R.id.menu_button); // Initialize menu button
+       // Initialize menu button
 
         FragmentAdapter fragmentAdapter = new FragmentAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         fragmentAdapter.addFragment(new ExistingActivity(), "Existing Activity");
@@ -88,34 +97,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        searchView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchView.requestFocus();
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-        searchView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(searchView, InputMethodManager.SHOW_IMPLICIT);
-                } else {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
-                }
-            }
-        });
 
         // Set click listener for menu button
-        menuButton.setOnClickListener(new View.OnClickListener() {
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+
+        SearchManager searchManager = (SearchManager) MainActivity.this.getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView1=(SearchView) findViewById(R.id.search_View);
+        MenuItem.OnActionExpandListener onActionExpandListener=new MenuItem.OnActionExpandListener() {
             @Override
-            public void onClick(View view) {
-                showMenu(view);
+            public boolean onMenuItemActionExpand(@NonNull MenuItem item) {
+                makeText(MainActivity.this, "fkwefiw", Toast.LENGTH_SHORT).show();
+                return true;
             }
+
+            @Override
+            public boolean onMenuItemActionCollapse(@NonNull MenuItem item) {
+                return true;
+            }
+        };
+        menu.findItem(R.id.search_View).setOnActionExpandListener(onActionExpandListener);
+        SearchView searchView2=(SearchView) menu.findItem(R.id.search_View).getActionView();
+        searchView2.setOnKeyListener((v, keyCode, event) -> {
+            Log.d(TAG, "onKey: "+event.getCharacters());
+            return false;
         });
+
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void showMenu(View view) {
@@ -144,6 +156,9 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_SHORT).show();
 
                     return true;
+
+                }else if(item.getItemId()==R.id.search_view){
+                    SearchView searchView1=(SearchView) item.getActionView();
 
                 }
 

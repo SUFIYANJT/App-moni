@@ -6,4 +6,8 @@
     <color name="cardBackgroundColor">#e1d2d2</color>
     <color name="progress_track_color">#6750a4</color>
     <color name="progress_indicator_color">#FFFFFFFF</color>
+    <color name="darkBackground">#1f0f09</color>
+    <color name="darCardView">#362d26</color>
+    <color name="lightDark">#141218</color>
+    <color name="darkLight">#fef7ff</color>
 </resources>

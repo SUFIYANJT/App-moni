@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    style="@style/Cantainer"
     tools:context=".ExistingActivity">
 
     <!-- RecyclerView with CardView -->
@@ -13,10 +14,11 @@
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        style="@style/Cantainer"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="#FFF" />
+         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
