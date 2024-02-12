@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    style="@style/Cantainer"
     tools:context=".IssuedActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -16,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:background="#FFF" />
+        style="@style/Cantainer"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

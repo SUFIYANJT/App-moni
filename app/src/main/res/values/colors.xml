@@ -3,11 +3,16 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="status">#6750a4</color>
-    <color name="cardBackgroundColor">#e1d2d2</color>
-    <color name="progress_track_color">#6750a4</color>
-    <color name="progress_indicator_color">#FFFFFFFF</color>
+    <color name="cardBackgroundColor">#FEF7FF</color>
+    <color name="progress_track_color">#D3E3FD</color>
+    <color name="progress_indicator_color">#0B57D0</color>
+    <color name="dark_progress_indicator_color">#A8C7FA</color>
+    <color name="Dark_progress_track_color">#0842A0</color>
     <color name="darkBackground">#1f0f09</color>
     <color name="darCardView">#362d26</color>
-    <color name="lightDark">#141218</color>
+    <color name="lightDark">#2B2930</color>
     <color name="darkLight">#fef7ff</color>
+    <color name="bd">#141218</color>
+    <color name="id">#f7f2fa</color>
+    <color name="ss">#E6E0E9</color>
 </resources>

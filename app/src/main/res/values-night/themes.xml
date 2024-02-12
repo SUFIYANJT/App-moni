@@ -3,25 +3,28 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/darkBackground</item>
-        <item name="android:colorPrimary">@color/darkBackground</item>
-        <item name="colorPrimaryDark">@color/darkBackground </item>
+        <item name="android:statusBarColor">@color/bd</item>
+        <item name="android:colorPrimary">@color/bd</item>
+        <item name="colorPrimaryDark">@color/bd</item>
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
     <style name="ActivityMain">
-        <item name="background">@color/darkBackground</item>
+        <item name="background">@color/bd</item>
         <item name="iconTint">@color/white</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:backgroundTint">@color/darkBackground</item>
+        <item name="android:backgroundTint">@color/bd</item>
     </style>
     <style name="Cantainer" >
-        <item name="android:background">@color/lightDark</item>
+        <item name="android:background">@color/bd</item>
         <item name="android:textColor">@color/darkLight</item>
     </style>
     <style name="CardViewStyle">
         <item name="android:textColor">@color/white</item>
-        <item name="android:background">@color/darCardView</item>
+        <item name="android:background">@color/lightDark</item>
     </style>
-    <style name="indicatorColor"><item name="indicatorColor">@color/white</item></style>
+    <style name="progressBar">
+        <item name="indicatorColor">@color/dark_progress_indicator_color</item>
+        <item name="trackColor">@color/Dark_progress_track_color</item>
+    </style>
 </resources>
