@@ -35,6 +35,7 @@ public class IssuedActivity extends Fragment {
 
         // Pass true for isInspecterReview and false for isPendingActivity
         CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
+
         recyclerView.setAdapter(customAdapter);
 
         // Set item click listener

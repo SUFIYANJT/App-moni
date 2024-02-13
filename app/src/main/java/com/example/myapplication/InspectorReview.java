@@ -39,7 +39,8 @@ public class InspectorReview extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // Pass false for isPendingActivity as it's InspectorReview
-        CustomAdapter customAdapter = new CustomAdapter(itemList, false, true);
+        CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
+
         recyclerView.setAdapter(customAdapter);
 
         // Set item click listener

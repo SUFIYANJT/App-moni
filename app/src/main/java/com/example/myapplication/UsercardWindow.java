@@ -62,7 +62,7 @@ public class UsercardWindow extends AppCompatActivity {
         attachmentButton = findViewById(R.id.attachmentButton);
         backButton = findViewById(R.id.back_buttonuserwindow);
         progressIndicator=findViewById(R.id.progress_linear_bar);
-        progressIndicator.setMax(100);int duration;
+        progressIndicator.setMax(100);
 
         // Set click listener for the back button
         backButton.setOnClickListener(v -> {
@@ -104,7 +104,7 @@ public class UsercardWindow extends AppCompatActivity {
             if (checkPermission()) {
                 try {
                     startRecording();
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
 
@@ -137,7 +137,6 @@ public class UsercardWindow extends AppCompatActivity {
         }
 
         mediaRecorder = new MediaRecorder();
-// ... other initialization here ...
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -171,17 +170,18 @@ public class UsercardWindow extends AppCompatActivity {
     private void playRecordedVoice(String filePath) {
         try {
             MediaPlayer mediaPlayer = new MediaPlayer();
-// ... other initialization here ...
             mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mediaPlayer.setDataSource(filePath);
-
-            duration = mediaPlayer.getDuration();
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+            mediaPlayer.setOnPreparedListener(mp -> {
+                // Start playback when prepared
+                mp.start();
+                duration = mp.getDuration();
+            });
             mediaPlayer.setOnCompletionListener(mp -> {
                 // Release the MediaPlayer when playback completes
-                mediaPlayer.release();
+                mp.release();
             });
+            mediaPlayer.prepareAsync(); // Asynchronously prepare the MediaPlayer
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to play recorded voice: " + e.getMessage(), Toast.LENGTH_SHORT).show();

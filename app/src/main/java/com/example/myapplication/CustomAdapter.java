@@ -21,6 +21,13 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     private boolean isPendingActivity;
     private boolean isInspecterReview;
 
+    public void setFilteredList(List<ItemModel> filteredList) {
+
+        this.itemList = filteredList;
+
+        notifyDataSetChanged();
+
+    }
     public CustomAdapter(List<ItemModel> itemList, boolean isPendingActivity, boolean isInspecterReview) {
         this.itemList = itemList;
         this.isPendingActivity = isPendingActivity;
@@ -93,5 +100,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             linearProgressIndicator = itemView.findViewById(R.id.linear_progress_indicator);
             imageView = itemView.findViewById(R.id.imageView);
         }
+
     }
 }

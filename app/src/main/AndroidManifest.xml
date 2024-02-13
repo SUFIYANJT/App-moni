@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.mic" />
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Declaration for camera hardware feature -->
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
 

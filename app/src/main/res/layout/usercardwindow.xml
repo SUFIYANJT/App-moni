@@ -10,22 +10,22 @@
         android:id="@+id/toolbaruserwindow"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#fef7ff"
+        style="@style/ActivityMain"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="#e1d2d2">
+       >
 
         <!-- Back Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/back_buttonuserwindow"
             android:layout_width="35dp"
             android:layout_height="match_parent"
-            app:backgroundTint="#fef7ff"
+            style="@style/ActivityMain"
             app:icon="@drawable/baseline_arrow_back"
             app:iconGravity="textStart"
             app:iconSize="25dp"
-            app:iconTint="#000" />
+            />
     </com.google.android.material.appbar.MaterialToolbar>
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:layout_width="match_parent"
@@ -62,8 +62,7 @@
         app:icon="@drawable/baseline_send_24"
         app:layout_constraintBottom_toBottomOf="@id/messageInputLayout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:iconTint="@color/black"
-        android:backgroundTint="#fef7ff"/>
+        style="@style/ActivityMain"/>
 
     <!-- Voice Message Button -->
     <com.google.android.material.button.MaterialButton
@@ -74,8 +73,7 @@
         app:iconSize="25dp"
         app:layout_constraintBottom_toBottomOf="@id/messageInputLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:backgroundTint="#fef7ff"
-        app:iconTint="@color/black"/>
+        style="@style/ActivityMain"/>
 
     <!-- Attachment Button -->
     <com.google.android.material.button.MaterialButton
@@ -84,8 +82,7 @@
         android:layout_height="wrap_content"
         app:icon="@drawable/baseline_attach_file_24"
         app:iconSize="25dp"
-        app:iconTint="@color/black"
-        app:backgroundTint="#fef7ff"
+        style="@style/ActivityMain"
         app:layout_constraintBottom_toTopOf="@id/voiceMessageButton"
         app:layout_constraintStart_toStartOf="@id/voiceMessageButton" />
 

@@ -10,11 +10,11 @@
         android:id="@+id/toolbarUSER"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#6750a4"
+       style="@style/ActivityMain"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="#FFF">
+       >
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/menu_button"
@@ -24,7 +24,7 @@
             app:icon="@drawable/more_vert_fill0_wght400_grad0_opsz24"
             app:iconGravity="textStart"
             app:iconSize="25dp"
-            app:iconTint="@color/white" />
+            style="@style/ActivityMain" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 
@@ -36,14 +36,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/cardViewUSER"
-        android:background="#FFF" />
+        />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardViewUSER"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:background="@color/white"
+      style="@style/CardViewStyle"
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
         app:layout_constraintStart_toStartOf="parent"

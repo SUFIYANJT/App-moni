@@ -14,31 +14,37 @@ import com.example.myapplication.model.ItemModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExistingActivity extends Fragment {
+public class ExistingActivity extends Fragment implements SearchableFragment {
+
+    private RecyclerView recyclerView;
+    private CustomAdapter adapter;
+    private List<ItemModel> itemList;
+
+    public ExistingActivity() {
+        // Required empty public constructor
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_existing_activity, container, false);
+        recyclerView = view.findViewById(R.id.recyclerView);
 
-        // Create dummy data
-        List<ItemModel> itemList = new ArrayList<>();
+        // Initialize itemList with dummy data
+        itemList = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            ItemModel model=new ItemModel();
-            model.setItemName("item "+i);
+            ItemModel model = new ItemModel();
+            model.setItemName("item " + i);
             itemList.add(model);
         }
 
         // Set up RecyclerView
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        // Pass false for isPendingActivity as it's not a pending activity
-        CustomAdapter customAdapter = new CustomAdapter(itemList, false,false);
-
-        recyclerView.setAdapter(customAdapter);
+        View emptyView =null;
+        adapter = new CustomAdapter(itemList, false, false);
+        recyclerView.setAdapter(adapter);
 
         // Set item click listener
-        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+        adapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(ItemModel item) {
                 // Show popup window
@@ -49,4 +55,32 @@ public class ExistingActivity extends Fragment {
 
         return view;
     }
-}
+
+    @Override
+    public void updateSearchQuery(String query) {
+
+        // Filter the list based on the search query
+
+        List<ItemModel> filteredList = new ArrayList<>();
+
+        for (ItemModel item : itemList) {
+
+            if (item.getItemName().toLowerCase().contains(query.toLowerCase())) {
+
+                filteredList.add(item);
+
+            }
+
+        }
+
+
+        // Update the RecyclerView with the filtered list
+
+        adapter.setFilteredList(filteredList);
+
+    }
+
+        // Update the RecyclerView with the filtered list
+
+    }
+
