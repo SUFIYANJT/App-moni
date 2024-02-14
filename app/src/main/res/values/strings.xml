@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">My Application</string>
+    <string name="type_your_message_here">Type your message here</string>
+    <string name="attached_file_uri">Attached File URI</string>
+    <string name="search">search</string>
 </resources>

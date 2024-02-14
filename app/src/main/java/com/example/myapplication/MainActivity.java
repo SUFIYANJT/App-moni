@@ -7,15 +7,20 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.button.MaterialButton;
@@ -48,7 +53,9 @@ public class MainActivity extends AppCompatActivity {
         fragmentAdapter.addFragment(new InspectorReview(), "Inspector Review");
         viewPager.setAdapter(fragmentAdapter);
         tabLayout.setupWithViewPager(viewPager);
-
+        MaterialToolbar toolbar=findViewById(R.id.toolbar);
+        toolbar.setTitle("tranvancore Cements");
+        setSupportActionBar(toolbar);
         bottomSheetFragment = new BottomSheetFragment();
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -66,56 +73,38 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu with items using MenuInflator
+        Log.d(TAG, "onCreateOptionsMenu: called this function");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        MenuItem searchViewItem = menu.findItem(R.id.search_View);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
 
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        // attach setOnQueryTextListener
+        // to search view defined above
+        if (searchView != null) {
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                // Override onQueryTextSubmit method which is call when submit query is searched
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    // If the list contains the search query than filter the adapter
+                    // using the filter method with the query as its argument
+                    Toast.makeText(MainActivity.this, "changing", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
 
-
-        // Set up search functionality
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-
-        MenuItem searchItem = menu.findItem(R.id.search_view);
-
-        SearchView searchView = (SearchView) searchItem.getActionView();
-
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-
-        // Set query text listener
-
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-            @Override
-
-            public boolean onQueryTextSubmit(String query) {
-
-                // Handle search query submission
-
-                updateFragmentSearchQuery(query);
-
-                return false;
-
-            }
-
-
-            @Override
-
-            public boolean onQueryTextChange(String newText) {
-
-                // Pass the newText to your fragments to update the UI accordingly
-
-                updateFragmentSearchQuery(newText);
-
-                return true;
-
-            }
-
-        });
-
-
-        return true;
-
+                // This method is overridden to filter the adapter according
+                // to a search query when the user is typing search
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    //adapter.getFilter().filter(newText);
+                    return true;
+                }
+            });
+        }
+        return super.onCreateOptionsMenu(menu);
     }
+
 
 
     private void updateFragmentSearchQuery(String query) {

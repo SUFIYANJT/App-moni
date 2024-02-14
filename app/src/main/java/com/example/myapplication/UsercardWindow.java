@@ -1,14 +1,23 @@
 package com.example.myapplication;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -25,10 +34,15 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class UsercardWindow extends AppCompatActivity {
     private static final int REQUEST_PERMISSION_CODE = 100;
     private LinearProgressIndicator progressIndicator;
+    private MediaExtractor extractor;
+    private MediaCodec codec;
+    private AudioTrack audioTrack;
+    private float playbackSpeed = 0.5f;
     int duration;
     private MediaRecorder mediaRecorder;
     private boolean isRecording = false;
@@ -62,7 +76,7 @@ public class UsercardWindow extends AppCompatActivity {
         attachmentButton = findViewById(R.id.attachmentButton);
         backButton = findViewById(R.id.back_buttonuserwindow);
         progressIndicator=findViewById(R.id.progress_linear_bar);
-        progressIndicator.setMax(100);
+        progressIndicator.setMax(100);int duration;
 
         // Set click listener for the back button
         backButton.setOnClickListener(v -> {
@@ -104,7 +118,7 @@ public class UsercardWindow extends AppCompatActivity {
             if (checkPermission()) {
                 try {
                     startRecording();
-                } catch (IOException e) {
+                }catch (IOException e){
                     e.printStackTrace();
                 }
 
@@ -137,6 +151,7 @@ public class UsercardWindow extends AppCompatActivity {
         }
 
         mediaRecorder = new MediaRecorder();
+// ... other initialization here ...
 
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
@@ -163,25 +178,29 @@ public class UsercardWindow extends AppCompatActivity {
 
             // Play the recorded voice
             String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
-            playRecordedVoice(filePath);
+            try {
+                playAudioFile(filePath);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
         }
     }
 
     private void playRecordedVoice(String filePath) {
         try {
             MediaPlayer mediaPlayer = new MediaPlayer();
+// ... other initialization here ...
             mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mediaPlayer.setDataSource(filePath);
-            mediaPlayer.setOnPreparedListener(mp -> {
-                // Start playback when prepared
-                mp.start();
-                duration = mp.getDuration();
-            });
+
+            duration = mediaPlayer.getDuration();
+            mediaPlayer.prepare();
+            mediaPlayer.start();
             mediaPlayer.setOnCompletionListener(mp -> {
                 // Release the MediaPlayer when playback completes
-                mp.release();
+                mediaPlayer.release();
             });
-            mediaPlayer.prepareAsync(); // Asynchronously prepare the MediaPlayer
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to play recorded voice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -204,6 +223,116 @@ public class UsercardWindow extends AppCompatActivity {
             }
         }
     }
+    private void playAudioFile(String audioFilePath) throws IOException {
+        extractor = new MediaExtractor();
+        extractor.setDataSource(audioFilePath);
+        MediaFormat format = null;
+        for (int i = 0; i < extractor.getTrackCount(); i++) {
+            format = extractor.getTrackFormat(i);
+            String mime = format.getString(MediaFormat.KEY_MIME);
+            if (mime.startsWith("audio/")) {
+                extractor.selectTrack(i);
+                break;
+            }
+        }
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(audioFilePath);
+        String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        retriever.release();
+        long duration=Long.parseLong(durationStr);
+        duration=duration*1000;
+        Log.d(TAG, "playAudioFile: "+duration);
+        codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+        codec.configure(format, null, null, 0);
+        codec.start();
+        ByteBuffer[] inputBuffers = codec.getInputBuffers();
+        ByteBuffer[] outputBuffers = codec.getOutputBuffers();
+        MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+        int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+        int bufferSize = AudioTrack.getMinBufferSize((int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed),
+                channelConfig, AudioFormat.ENCODING_PCM_16BIT);
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                (int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed), channelConfig,
+                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
+        audioTrack.setPlaybackRate((int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed)); // Adjust the playback speed
+        audioTrack.play();
+        long lastPresentationTime = -1;
+        int count=0;
+        long presentationTime = 0;
+        while (duration!=info.presentationTimeUs) {
+
+            presentationTime=extractor.getSampleTime();
+            Log.d(TAG, "playAudioFile: info "+presentationTime+" "+duration);
+            int inputIndex = codec.dequeueInputBuffer(-1);
+
+            if (inputIndex >= 0) {
+                ByteBuffer inputBuffer = inputBuffers[inputIndex];
+                int sampleSize = extractor.readSampleData(inputBuffer, 0);
+
+                if (sampleSize < 0) {
+                    codec.queueInputBuffer(inputIndex, 0, 0, 0, 0);
+                } else {
+                    codec.queueInputBuffer(inputIndex, 0, sampleSize, extractor.getSampleTime(), 0);
+                    extractor.advance();
+                }
+            }
+
+            if (presentationTime > lastPresentationTime) {
+                lastPresentationTime = presentationTime;
+            }
+            int outputIndex = codec.dequeueOutputBuffer(info, 0);
+
+            if (outputIndex >= 0) {
+                ByteBuffer outputBuffer = outputBuffers[outputIndex];
+                byte[] chunk = new byte[info.size];
+                outputBuffer.get(chunk);
+                outputBuffer.clear();
+                audioTrack.write(chunk, 0, chunk.length);
+                codec.releaseOutputBuffer(outputIndex, false);
+            }
+            switch (outputIndex) {
+                case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                    Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
+                    outputBuffers = codec.getOutputBuffers();
+                    break;
+                case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                    MediaFormat mediaFormat = codec.getOutputFormat();
+                    Log.d("DecodeActivity", "New format " + mediaFormat);
+                    //   audioTrack.setPlaybackRate(mediaFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
+                    break;
+                case MediaCodec.INFO_TRY_AGAIN_LATER:
+                    Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
+                    break;
+
+                default:
+                    Log.v("", "Inside While Loop Break Point 3");
+                    break;
+            }
+            Log.d(TAG, "playAudioFile: "+info.flags+" "+MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+            if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                Log.d("DecodeActivity", "OutputBuffer BUFFER_FLAG_END_OF_STREAM");
+                break;
+            }
+        }
+    }
+
+    private void releaseResources() {
+        if (codec != null) {
+            codec.stop();
+            codec.release();
+            Log.d(TAG, "releaseResources: Codec released");
+        }
+        if (audioTrack != null) {
+            audioTrack.stop();
+            audioTrack.release();
+            Log.d(TAG, "releaseResources: audioTracker released");
+        }
+        if (extractor != null) {
+            extractor.release();
+            Log.d(TAG, "releaseResources: extractor released");
+        }
+    }
+
 
     public void attachFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
