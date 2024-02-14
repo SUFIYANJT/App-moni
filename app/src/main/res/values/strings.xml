@@ -4,4 +4,6 @@
     <string name="type_your_message_here">Type your message here</string>
     <string name="attached_file_uri">Attached File URI</string>
     <string name="search">search</string>
+    <string name="sender">sender</string>
+    <string name="receiver">Receiver</string>
 </resources>

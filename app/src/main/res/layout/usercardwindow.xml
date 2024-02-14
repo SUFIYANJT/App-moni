@@ -27,25 +27,21 @@
             app:iconSize="25dp"
             />
     </com.google.android.material.appbar.MaterialToolbar>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:backgroundTint="#fef7ff"
-        android:text="play"
-        app:icon="@drawable/baseline_arrow_back"
-        app:iconGravity="textStart"
-        app:iconSize="25dp"
-        app:iconTint="#000"
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:id="@+id/chatRecycler"
+        android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintTop_toBottomOf="@+id/toolbaruserwindow"
+        app:layout_constraintBottom_toTopOf="@+id/messageInputLayout"
         />
     <SeekBar
         android:layout_width="match_parent"
         android:layout_margin="10dp"
         app:trackColor="@color/black"
+        app:layout_constraintVertical_bias="0.89"
         android:id="@+id/progress_linear_bar"
         app:indicatorColor="#ff0000"
         android:layout_height="wrap_content"

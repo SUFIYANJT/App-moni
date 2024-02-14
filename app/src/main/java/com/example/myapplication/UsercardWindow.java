@@ -1,23 +1,15 @@
 package com.example.myapplication;
 
+import static android.view.View.getDefaultSize;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.media.MediaCodec;
-import android.media.MediaExtractor;
-import android.media.MediaFormat;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.PowerManager;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -29,33 +21,30 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
 
-import com.example.myapplication.Audio.AudioThread;
-import com.example.myapplication.model.ItemModel;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.color.utilities.PointProviderLab;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Objects;
 
-public class UsercardWindow extends AppCompatActivity implements Runnable {
+interface DataParser{
+    public boolean isPlaying();
+    public void setPlaying(Boolean isPlaying);
+}
+
+public class UsercardWindow extends AppCompatActivity  {
     private static final int REQUEST_PERMISSION_CODE = 100;
     private SeekBar seekBar;
-    private MediaExtractor extractor;
-    private MediaCodec codec;
-    private AudioTrack audioTrack;
     private Boolean isPlaying=false;
-    private float playbackSpeed = 0.5f;
-    int duration;
     private MediaRecorder mediaRecorder;
-    MediaPlayer mediaPlayer;
+
     private boolean isRecording = false;
 
     private TextInputEditText messageInputEditText;
-    private MaterialButton sendButton, voiceMessageButton, attachmentButton, backButton;
+    private ArrayList<PlayerChecker> playerCheckers=new ArrayList<>();
 
 
     // Declare this instance variable
@@ -66,6 +55,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
                     Intent data = result.getData();
                     if (data != null) {
                         Uri uri = data.getData();
+                        assert uri != null;
                         Toast.makeText(this, "File attached: " + uri.getPath(), Toast.LENGTH_SHORT).show();
                         // Display the attached file
                         displayAttachedFile(uri);
@@ -79,10 +69,10 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.usercardwindow);
         messageInputEditText = findViewById(R.id.messageInputEditText);
-        sendButton = findViewById(R.id.sendButton);
-        voiceMessageButton = findViewById(R.id.voiceMessageButton);
-        attachmentButton = findViewById(R.id.attachmentButton);
-        backButton = findViewById(R.id.back_buttonuserwindow);
+        MaterialButton sendButton = findViewById(R.id.sendButton);
+        MaterialButton voiceMessageButton = findViewById(R.id.voiceMessageButton);
+        MaterialButton attachmentButton = findViewById(R.id.attachmentButton);
+        MaterialButton backButton = findViewById(R.id.back_buttonuserwindow);
         seekBar=findViewById(R.id.progress_linear_bar);
 
         // Set click listener for the back button
@@ -111,7 +101,9 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
                     Log.d(TAG, "onProgressChanged: progress "+progress);
                     seekBar.setProgress(progress);
                     isPlaying=false;
-                    playAudio(new File(getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3"),progress);
+                    if(playerCheckers.size()>0)
+                        playerCheckers.get(playerCheckers.size()-1).stopPlaying(true);
+                    playAudio(new File(Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3"),progress);
                 }
             }
 
@@ -130,7 +122,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
     }
 
     public void sendMessage() {
-        String message = messageInputEditText.getText().toString().trim();
+        String message = Objects.requireNonNull(messageInputEditText.getText()).toString().trim();
         if (!message.isEmpty()) {
             // Send text message
             Toast.makeText(this, "Text message sent: " + message, Toast.LENGTH_SHORT).show();
@@ -140,10 +132,9 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
     }
 
     public void recordVoiceMessage() {
-
-        Audio audio=new Audio();
         if (!isRecording) {
             if (checkPermission()) {
+                Audio audio=new Audio();
                 audio.start();
             } else {
                 Log.d(TAG, "recordVoiceMessage: requesting for permission ");
@@ -155,21 +146,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        while (isPlaying){
-            try {
-                Thread.sleep(100);
-                seekBar.setProgress(mediaPlayer.getCurrentPosition(),true);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if(mediaPlayer.getCurrentPosition()==mediaPlayer.getDuration()){
-                isPlaying=false;
-            }
-            Log.d(TAG, "run: playing running");
-        }
-    }
+
 
     class Audio extends Thread{
         @Override
@@ -178,7 +155,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
             startRecording();
         }
         private void startRecording(){
-            String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
+            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3";
             File file=new File(filePath);
             if(!file.exists()) {
                 try {
@@ -203,12 +180,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
                 mediaRecorder.start();
                 isRecording = true;
                // Toast.makeText(this, "Recording started...", Toast.LENGTH_SHORT).show();
-                UsercardWindow.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(UsercardWindow.this, "Recording started ", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                UsercardWindow.this.runOnUiThread(() -> Toast.makeText(UsercardWindow.this, "Recording started ", Toast.LENGTH_SHORT).show());
             } catch (IOException e) {
                 e.printStackTrace();
                // Toast.makeText(this, "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -223,7 +195,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
             mediaRecorder = null;
             isRecording = false;
             Toast.makeText(this, "Recording stopped...", Toast.LENGTH_SHORT).show();
-            String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
+            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3";
             if(ContextCompat.checkSelfPermission(UsercardWindow.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED){
                 playAudio(new File(filePath),0);
             }else{
@@ -242,6 +214,7 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
     }
 
     public void playAudio(File audioFile,int seek){
+        MediaPlayer mediaPlayer;
         mediaPlayer = new MediaPlayer();
         if (audioFile != null && audioFile.exists()) {
             try {
@@ -253,13 +226,44 @@ public class UsercardWindow extends AppCompatActivity implements Runnable {
                 mediaPlayer.setVolume(1.0f,1.0f);
                 mediaPlayer.start();
                 isPlaying = true;
-                new Thread(this).start();
+                PlayerChecker playerChecker=new PlayerChecker(mediaPlayer);
+                playerChecker.start();
+                playerCheckers.add(playerChecker);
             } catch (IOException e) {
                 e.printStackTrace();
                 Toast.makeText(this, "Failed to play recording", Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(this, "No recording available to play", Toast.LENGTH_SHORT).show();
+        }
+    }
+    class PlayerChecker extends Thread {
+        MediaPlayer mediaPlayer;
+        boolean isPlaying=true;
+        PlayerChecker(MediaPlayer mediaPlayer){
+            this.mediaPlayer=mediaPlayer;
+        }
+        @Override
+        public void run() {
+            while (isPlaying){
+                if(mediaPlayer.getCurrentPosition()==mediaPlayer.getDuration()){
+                    isPlaying=false;
+                    break;
+                }
+                try {
+                    Thread.sleep(100);
+                    if(mediaPlayer!=null&&mediaPlayer.isPlaying())
+                        seekBar.setProgress(mediaPlayer.getCurrentPosition(),true);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d(TAG, "run: playing running");
+            }
+            mediaPlayer.release();
+            Log.d(TAG, "run: mediaPlayer released ");
+        }
+        public void stopPlaying(boolean isPlaying){
+            this.isPlaying=!isPlaying;
         }
     }
 
