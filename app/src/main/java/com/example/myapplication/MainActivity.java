@@ -77,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreateOptionsMenu: called this function");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
-        MenuItem searchViewItem = menu.findItem(R.id.search_View);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchViewItem);
+        MenuItem menuItem = menu.findItem(R.id.search_View);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
 
         // attach setOnQueryTextListener
         // to search view defined above
@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     // If the list contains the search query than filter the adapter
                     // using the filter method with the query as its argument
                     Toast.makeText(MainActivity.this, "changing", Toast.LENGTH_SHORT).show();
+                    updateFragmentSearchQuery(query);
                     return true;
                 }
 
@@ -97,14 +98,31 @@ public class MainActivity extends AppCompatActivity {
                 // to a search query when the user is typing search
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    //adapter.getFilter().filter(newText);
+                    updateFragmentSearchQuery(newText);
                     return true;
                 }
             });
         }
         return super.onCreateOptionsMenu(menu);
     }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        // Handle item selection
+        if (id == R.id.search_View) {
+            // Handle Item 1 selection
+            return true;
+        } else if (id == R.id.menu_settings) {
+            // Handle Item 2 selection
+            return true;
+        } else if (id == R.id.menu_logout) {
+            // Handle Item 3 selection
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
 
+    }
 
 
     private void updateFragmentSearchQuery(String query) {

@@ -21,8 +21,9 @@ import com.example.myapplication.model.ItemModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PendingActivity extends Fragment {
-
+public class PendingActivity extends Fragment  implements SearchableFragment{
+    List<ItemModel> itemList;
+    CustomAdapter customAdapter;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -30,7 +31,8 @@ public class PendingActivity extends Fragment {
         View view = inflater.inflate(R.layout.fragment_pending_activity, container, false);
 
         // Create dummy data
-        List<ItemModel> itemList = new ArrayList<>();
+
+        itemList = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
             ItemModel model = new ItemModel();
             model.setItemName("item " + i);
@@ -42,7 +44,8 @@ public class PendingActivity extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // Pass true for isPendingActivity to show progress indicators
-        CustomAdapter customAdapter = new CustomAdapter(itemList, true, false);
+
+        customAdapter = new CustomAdapter(itemList, true, false);
 
         recyclerView.setAdapter(customAdapter);
 
@@ -66,5 +69,22 @@ public class PendingActivity extends Fragment {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void updateSearchQuery(String query) {
+        // Filter the list based on the search query
+        List<ItemModel> filteredList = new ArrayList<>();
+        for (ItemModel item : itemList) {
+
+            if (item.getItemName().toLowerCase().contains(query.toLowerCase())) {
+
+                filteredList.add(item);
+
+            }
+
+        }
+        // Update the RecyclerView with the filtered list
+        customAdapter.setFilteredList(filteredList);
+
     }
 }
