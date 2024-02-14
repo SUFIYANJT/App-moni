@@ -45,7 +45,9 @@
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:layout_width="match_parent"
         android:layout_margin="10dp"
+        app:trackColor="@color/black"
         android:id="@+id/progress_linear_bar"
+        app:indicatorColor="#ff0000"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

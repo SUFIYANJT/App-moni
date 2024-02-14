@@ -27,8 +27,12 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
 
+import com.example.myapplication.Audio.AudioThread;
+import com.example.myapplication.model.ItemModel;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.color.utilities.PointProviderLab;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -97,8 +101,11 @@ public class UsercardWindow extends AppCompatActivity {
         attachedImageView.getLayoutParams().width = getResources().getDimensionPixelSize(R.dimen.attached_image_width);
         attachedImageView.getLayoutParams().height = getResources().getDimensionPixelSize(R.dimen.attached_image_height);
         attachedImageView.requestLayout();
-
-
+        ItemModel item = new ItemModel();
+        item.getLiveDataExample().observe(this, value -> {
+            Log.d(TAG, "stopRecording: accept it sufiyan");
+            progressIndicator.setProgress(value.intValue(),true);
+        });
         // Set click listener for the attached image view
         attachedImageView.setOnClickListener(v -> openFullScreenImage());
     }
@@ -178,35 +185,10 @@ public class UsercardWindow extends AppCompatActivity {
 
             // Play the recorded voice
             String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
-            try {
-                playAudioFile(filePath);
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-
+            AudioThread audioThread=new AudioThread(filePath,extractor,codec,audioTrack,playbackSpeed,progressIndicator);
+            audioThread.start();
         }
     }
-
-    private void playRecordedVoice(String filePath) {
-        try {
-            MediaPlayer mediaPlayer = new MediaPlayer();
-// ... other initialization here ...
-            mediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            mediaPlayer.setDataSource(filePath);
-
-            duration = mediaPlayer.getDuration();
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            mediaPlayer.setOnCompletionListener(mp -> {
-                // Release the MediaPlayer when playback completes
-                mediaPlayer.release();
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to play recorded voice: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -221,115 +203,6 @@ public class UsercardWindow extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
             }
-        }
-    }
-    private void playAudioFile(String audioFilePath) throws IOException {
-        extractor = new MediaExtractor();
-        extractor.setDataSource(audioFilePath);
-        MediaFormat format = null;
-        for (int i = 0; i < extractor.getTrackCount(); i++) {
-            format = extractor.getTrackFormat(i);
-            String mime = format.getString(MediaFormat.KEY_MIME);
-            if (mime.startsWith("audio/")) {
-                extractor.selectTrack(i);
-                break;
-            }
-        }
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(audioFilePath);
-        String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        retriever.release();
-        long duration=Long.parseLong(durationStr);
-        duration=duration*1000;
-        Log.d(TAG, "playAudioFile: "+duration);
-        codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
-        codec.configure(format, null, null, 0);
-        codec.start();
-        ByteBuffer[] inputBuffers = codec.getInputBuffers();
-        ByteBuffer[] outputBuffers = codec.getOutputBuffers();
-        MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
-        int channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
-        int bufferSize = AudioTrack.getMinBufferSize((int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed),
-                channelConfig, AudioFormat.ENCODING_PCM_16BIT);
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                (int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed), channelConfig,
-                AudioFormat.ENCODING_PCM_16BIT, bufferSize, AudioTrack.MODE_STREAM);
-        audioTrack.setPlaybackRate((int) (format.getInteger(MediaFormat.KEY_SAMPLE_RATE) * playbackSpeed)); // Adjust the playback speed
-        audioTrack.play();
-        long lastPresentationTime = -1;
-        int count=0;
-        long presentationTime = 0;
-        while (duration!=info.presentationTimeUs) {
-
-            presentationTime=extractor.getSampleTime();
-            Log.d(TAG, "playAudioFile: info "+presentationTime+" "+duration);
-            int inputIndex = codec.dequeueInputBuffer(-1);
-
-            if (inputIndex >= 0) {
-                ByteBuffer inputBuffer = inputBuffers[inputIndex];
-                int sampleSize = extractor.readSampleData(inputBuffer, 0);
-
-                if (sampleSize < 0) {
-                    codec.queueInputBuffer(inputIndex, 0, 0, 0, 0);
-                } else {
-                    codec.queueInputBuffer(inputIndex, 0, sampleSize, extractor.getSampleTime(), 0);
-                    extractor.advance();
-                }
-            }
-
-            if (presentationTime > lastPresentationTime) {
-                lastPresentationTime = presentationTime;
-            }
-            int outputIndex = codec.dequeueOutputBuffer(info, 0);
-
-            if (outputIndex >= 0) {
-                ByteBuffer outputBuffer = outputBuffers[outputIndex];
-                byte[] chunk = new byte[info.size];
-                outputBuffer.get(chunk);
-                outputBuffer.clear();
-                audioTrack.write(chunk, 0, chunk.length);
-                codec.releaseOutputBuffer(outputIndex, false);
-            }
-            switch (outputIndex) {
-                case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
-                    Log.d("DecodeActivity", "INFO_OUTPUT_BUFFERS_CHANGED");
-                    outputBuffers = codec.getOutputBuffers();
-                    break;
-                case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                    MediaFormat mediaFormat = codec.getOutputFormat();
-                    Log.d("DecodeActivity", "New format " + mediaFormat);
-                    //   audioTrack.setPlaybackRate(mediaFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE));
-                    break;
-                case MediaCodec.INFO_TRY_AGAIN_LATER:
-                    Log.d("DecodeActivity", "dequeueOutputBuffer timed out!");
-                    break;
-
-                default:
-                    Log.v("", "Inside While Loop Break Point 3");
-                    break;
-            }
-            Log.d(TAG, "playAudioFile: "+info.flags+" "+MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-            if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-                Log.d("DecodeActivity", "OutputBuffer BUFFER_FLAG_END_OF_STREAM");
-                break;
-            }
-        }
-    }
-
-    private void releaseResources() {
-        if (codec != null) {
-            codec.stop();
-            codec.release();
-            Log.d(TAG, "releaseResources: Codec released");
-        }
-        if (audioTrack != null) {
-            audioTrack.stop();
-            audioTrack.release();
-            Log.d(TAG, "releaseResources: audioTracker released");
-        }
-        if (extractor != null) {
-            extractor.release();
-            Log.d(TAG, "releaseResources: extractor released");
         }
     }
 
