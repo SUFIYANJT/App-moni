@@ -16,9 +16,11 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -33,26 +35,28 @@ import com.example.myapplication.Audio.AudioThread;
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.utilities.PointProviderLab;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class UsercardWindow extends AppCompatActivity {
+public class UsercardWindow extends AppCompatActivity implements Runnable {
     private static final int REQUEST_PERMISSION_CODE = 100;
-    private LinearProgressIndicator progressIndicator;
+    private SeekBar seekBar;
     private MediaExtractor extractor;
     private MediaCodec codec;
     private AudioTrack audioTrack;
+    private Boolean isPlaying=false;
     private float playbackSpeed = 0.5f;
     int duration;
     private MediaRecorder mediaRecorder;
+    MediaPlayer mediaPlayer;
     private boolean isRecording = false;
 
     private TextInputEditText messageInputEditText;
     private MaterialButton sendButton, voiceMessageButton, attachmentButton, backButton;
+
 
     // Declare this instance variable
     private final ActivityResultLauncher<Intent> filePickerActivityResultLauncher = registerForActivityResult(
@@ -79,8 +83,7 @@ public class UsercardWindow extends AppCompatActivity {
         voiceMessageButton = findViewById(R.id.voiceMessageButton);
         attachmentButton = findViewById(R.id.attachmentButton);
         backButton = findViewById(R.id.back_buttonuserwindow);
-        progressIndicator=findViewById(R.id.progress_linear_bar);
-        progressIndicator.setMax(100);int duration;
+        seekBar=findViewById(R.id.progress_linear_bar);
 
         // Set click listener for the back button
         backButton.setOnClickListener(v -> {
@@ -101,10 +104,26 @@ public class UsercardWindow extends AppCompatActivity {
         attachedImageView.getLayoutParams().width = getResources().getDimensionPixelSize(R.dimen.attached_image_width);
         attachedImageView.getLayoutParams().height = getResources().getDimensionPixelSize(R.dimen.attached_image_height);
         attachedImageView.requestLayout();
-        ItemModel item = new ItemModel();
-        item.getLiveDataExample().observe(this, value -> {
-            Log.d(TAG, "stopRecording: accept it sufiyan");
-            progressIndicator.setProgress(value.intValue(),true);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser){
+                    Log.d(TAG, "onProgressChanged: progress "+progress);
+                    seekBar.setProgress(progress);
+                    isPlaying=false;
+                    playAudio(new File(getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3"),progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG, "onStartTrackingTouch: start touch "+seekBar.getProgress());
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.d(TAG, "onStartTrackingTouch: stop touch "+seekBar.getProgress());
+            }
         });
         // Set click listener for the attached image view
         attachedImageView.setOnClickListener(v -> openFullScreenImage());
@@ -121,19 +140,95 @@ public class UsercardWindow extends AppCompatActivity {
     }
 
     public void recordVoiceMessage() {
+
+        Audio audio=new Audio();
         if (!isRecording) {
             if (checkPermission()) {
-                try {
-                    startRecording();
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-
+                audio.start();
             } else {
+                Log.d(TAG, "recordVoiceMessage: requesting for permission ");
                 requestPermission();
+                Log.d(TAG, "recordVoiceMessage: finished permission ");
             }
         } else {
             stopRecording();
+        }
+    }
+
+    @Override
+    public void run() {
+        while (isPlaying){
+            try {
+                Thread.sleep(100);
+                seekBar.setProgress(mediaPlayer.getCurrentPosition(),true);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(mediaPlayer.getCurrentPosition()==mediaPlayer.getDuration()){
+                isPlaying=false;
+            }
+            Log.d(TAG, "run: playing running");
+        }
+    }
+
+    class Audio extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            startRecording();
+        }
+        private void startRecording(){
+            String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
+            File file=new File(filePath);
+            if(!file.exists()) {
+                try {
+                    if (file.createNewFile()) {
+                       // Toast.makeText(this, "file created successfully", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "startRecording: file created successfully");
+                    } else {
+                        //Toast.makeText(this, "new File created failed", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "startRecording: file create failed");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mediaRecorder.setOutputFile(filePath);
+            try {
+                mediaRecorder.prepare();
+                mediaRecorder.start();
+                isRecording = true;
+               // Toast.makeText(this, "Recording started...", Toast.LENGTH_SHORT).show();
+                UsercardWindow.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(UsercardWindow.this, "Recording started ", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+               // Toast.makeText(this, "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+    private void stopRecording() {
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            isRecording = false;
+            Toast.makeText(this, "Recording stopped...", Toast.LENGTH_SHORT).show();
+            String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
+            if(ContextCompat.checkSelfPermission(UsercardWindow.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED){
+                playAudio(new File(filePath),0);
+            }else{
+                ActivityCompat.requestPermissions(UsercardWindow.this, new String[]{Manifest.permission.RECORD_AUDIO},REQUEST_PERMISSION_CODE);
+            }
         }
     }
 
@@ -146,66 +241,45 @@ public class UsercardWindow extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
 
-    private void startRecording() throws IOException {
-        String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
-        File file=new File(filePath);
-        if(!file.exists()) {
-            if (file.createNewFile()) {
-                Toast.makeText(this, "file created successfully", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "new File created failed", Toast.LENGTH_SHORT).show();
+    public void playAudio(File audioFile,int seek){
+        mediaPlayer = new MediaPlayer();
+        if (audioFile != null && audioFile.exists()) {
+            try {
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+                mediaPlayer.prepare();
+                seekBar.setMax(mediaPlayer.getDuration());
+                mediaPlayer.seekTo(seek);
+                mediaPlayer.setVolume(1.0f,1.0f);
+                mediaPlayer.start();
+                isPlaying = true;
+                new Thread(this).start();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Failed to play recording", Toast.LENGTH_SHORT).show();
             }
-        }
-
-        mediaRecorder = new MediaRecorder();
-// ... other initialization here ...
-
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        mediaRecorder.setOutputFile(filePath);
-        try {
-            mediaRecorder.prepare();
-            mediaRecorder.start();
-            isRecording = true;
-            Toast.makeText(this, "Recording started...", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to start recording: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No recording available to play", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void stopRecording() {
-        if (mediaRecorder != null) {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            isRecording = false;
-            Toast.makeText(this, "Recording stopped...", Toast.LENGTH_SHORT).show();
-
-            // Play the recorded voice
-            String filePath = getExternalCacheDir().getAbsolutePath() + "/voice_message.mp3";
-            AudioThread audioThread=new AudioThread(filePath,extractor,codec,audioTrack,playbackSpeed,progressIndicator);
-            audioThread.start();
-        }
-    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(TAG, "onRequestPermissionsResult: trying to access permission ");
         if (requestCode == REQUEST_PERMISSION_CODE) {
+            Log.d(TAG, "onRequestPermissionsResult: working ");
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                try {
-                    startRecording();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                Log.d(TAG, "onRequestPermissionsResult: working too");
+                Toast.makeText(this, "permission granted ", Toast.LENGTH_SHORT).show();
             } else {
+                Log.d(TAG, "onRequestPermissionsResult: permission denied ");
                 Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
             }
+        }else {
+            Log.d(TAG, "onRequestPermissionsResult: permission code not found");
         }
     }
-
 
     public void attachFile() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);

@@ -42,7 +42,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
-    <com.google.android.material.progressindicator.LinearProgressIndicator
+    <SeekBar
         android:layout_width="match_parent"
         android:layout_margin="10dp"
         app:trackColor="@color/black"
