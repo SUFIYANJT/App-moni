@@ -1,6 +1,5 @@
 package com.example.myapplication;
 
-import static android.view.View.getDefaultSize;
 import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import android.Manifest;
@@ -21,7 +20,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Support.SubmitHolder;
+import com.example.myapplication.model.ItemModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -30,21 +33,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
 
-interface DataParser{
-    public boolean isPlaying();
-    public void setPlaying(Boolean isPlaying);
-}
-
 public class UsercardWindow extends AppCompatActivity  {
     private static final int REQUEST_PERMISSION_CODE = 100;
     private SeekBar seekBar;
-    private Boolean isPlaying=false;
     private MediaRecorder mediaRecorder;
 
     private boolean isRecording = false;
+    private boolean isPlaying=false;
 
     private TextInputEditText messageInputEditText;
-    private ArrayList<PlayerChecker> playerCheckers=new ArrayList<>();
+    ArrayList<PlayerChecker> playerCheckers=new ArrayList<>();
+    ArrayList<SubmitHolder> submitHolders=new ArrayList<>();
+    RecyclerView recyclerView;
+    RecyclerReport recyclerReport;
 
 
     // Declare this instance variable
@@ -58,7 +59,6 @@ public class UsercardWindow extends AppCompatActivity  {
                         assert uri != null;
                         Toast.makeText(this, "File attached: " + uri.getPath(), Toast.LENGTH_SHORT).show();
                         // Display the attached file
-                        displayAttachedFile(uri);
                     }
                 }
             }
@@ -70,6 +70,10 @@ public class UsercardWindow extends AppCompatActivity  {
         setContentView(R.layout.usercardwindow);
         messageInputEditText = findViewById(R.id.messageInputEditText);
         MaterialButton sendButton = findViewById(R.id.sendButton);
+        recyclerReport=new RecyclerReport(this,submitHolders,new UsercardWindow());
+        recyclerView=findViewById(R.id.chatRecycler);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(recyclerReport);
         MaterialButton voiceMessageButton = findViewById(R.id.voiceMessageButton);
         MaterialButton attachmentButton = findViewById(R.id.attachmentButton);
         MaterialButton backButton = findViewById(R.id.back_buttonuserwindow);
@@ -82,6 +86,7 @@ public class UsercardWindow extends AppCompatActivity  {
             finish();
         });
 
+
         // Set click listeners for the other buttons
         sendButton.setOnClickListener(v -> sendMessage());
 
@@ -90,10 +95,6 @@ public class UsercardWindow extends AppCompatActivity  {
         attachmentButton.setOnClickListener(v -> attachFile());
 
         // Set fixed dimensions for the attached image view
-        ImageView attachedImageView = findViewById(R.id.attachedImageView);
-        attachedImageView.getLayoutParams().width = getResources().getDimensionPixelSize(R.dimen.attached_image_width);
-        attachedImageView.getLayoutParams().height = getResources().getDimensionPixelSize(R.dimen.attached_image_height);
-        attachedImageView.requestLayout();
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -103,7 +104,7 @@ public class UsercardWindow extends AppCompatActivity  {
                     isPlaying=false;
                     if(playerCheckers.size()>0)
                         playerCheckers.get(playerCheckers.size()-1).stopPlaying(true);
-                    playAudio(new File(Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3"),progress);
+                  //  playAudio(new File(Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3"),progress);
                 }
             }
 
@@ -118,7 +119,17 @@ public class UsercardWindow extends AppCompatActivity  {
             }
         });
         // Set click listener for the attached image view
-        attachedImageView.setOnClickListener(v -> openFullScreenImage());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ItemModel itemModel=new ItemModel();
+        Log.d(TAG, "onResume: resumed activity ");
+        if(itemModel.getArrayListMutableLiveData()!=null){
+            submitHolders=itemModel.getArrayListMutableLiveData();
+            Log.d(TAG, "onCreate: submitHolders "+submitHolders.size());
+        }
     }
 
     public void sendMessage() {
@@ -197,7 +208,15 @@ public class UsercardWindow extends AppCompatActivity  {
             Toast.makeText(this, "Recording stopped...", Toast.LENGTH_SHORT).show();
             String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3";
             if(ContextCompat.checkSelfPermission(UsercardWindow.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED){
-                playAudio(new File(filePath),0);
+                //playAudio(new File(filePath),0);
+                SubmitHolder submitHolder=new SubmitHolder();
+                File file=new File(filePath);
+                if(file.exists()){
+                    submitHolder.setFile(file);
+                    submitHolder.setMode(2);
+                }
+                submitHolders.add(submitHolder);
+                recyclerReport.notifyItemInserted(submitHolders.size());
             }else{
                 ActivityCompat.requestPermissions(UsercardWindow.this, new String[]{Manifest.permission.RECORD_AUDIO},REQUEST_PERMISSION_CODE);
             }
@@ -213,9 +232,8 @@ public class UsercardWindow extends AppCompatActivity  {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSION_CODE);
     }
 
-    public void playAudio(File audioFile,int seek){
-        MediaPlayer mediaPlayer;
-        mediaPlayer = new MediaPlayer();
+    public void playAudio(File audioFile,int seek,SeekBar seekBar){
+        MediaPlayer mediaPlayer = new MediaPlayer();
         if (audioFile != null && audioFile.exists()) {
             try {
                 mediaPlayer.reset();
@@ -226,7 +244,7 @@ public class UsercardWindow extends AppCompatActivity  {
                 mediaPlayer.setVolume(1.0f,1.0f);
                 mediaPlayer.start();
                 isPlaying = true;
-                PlayerChecker playerChecker=new PlayerChecker(mediaPlayer);
+                PlayerChecker playerChecker= new PlayerChecker(mediaPlayer, seekBar);
                 playerChecker.start();
                 playerCheckers.add(playerChecker);
             } catch (IOException e) {
@@ -237,21 +255,36 @@ public class UsercardWindow extends AppCompatActivity  {
             Toast.makeText(this, "No recording available to play", Toast.LENGTH_SHORT).show();
         }
     }
-    class PlayerChecker extends Thread {
+    public void StopAudio(int position){
+        playerCheckers.get(position).stopPlaying(true);
+    }
+    public void seekPosition(int position,int progress){
+        playerCheckers.get(position).setProgress(progress);
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save data to outState bundle
+        ItemModel model=new ItemModel();
+        model.setArrayListMutableLiveData(submitHolders);
+    }
+    static class PlayerChecker extends Thread {
         MediaPlayer mediaPlayer;
         boolean isPlaying=true;
-        PlayerChecker(MediaPlayer mediaPlayer){
+        SeekBar seekBar;
+        PlayerChecker(MediaPlayer mediaPlayer,SeekBar seekBar){
             this.mediaPlayer=mediaPlayer;
+            this.seekBar=seekBar;
         }
         @Override
         public void run() {
             while (isPlaying){
                 if(mediaPlayer.getCurrentPosition()==mediaPlayer.getDuration()){
-                    isPlaying=false;
+                    stopPlaying(true);
                     break;
                 }
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(50);
                     if(mediaPlayer!=null&&mediaPlayer.isPlaying())
                         seekBar.setProgress(mediaPlayer.getCurrentPosition(),true);
                 } catch (InterruptedException e) {
@@ -264,6 +297,10 @@ public class UsercardWindow extends AppCompatActivity  {
         }
         public void stopPlaying(boolean isPlaying){
             this.isPlaying=!isPlaying;
+        }
+        public void setProgress(int progress){
+            this.mediaPlayer.seekTo(progress);
+            this.seekBar.setProgress(progress,true);
         }
     }
 
@@ -289,28 +326,5 @@ public class UsercardWindow extends AppCompatActivity  {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*"); // Restrict to images only
         filePickerActivityResultLauncher.launch(intent);
-    }
-
-    private void displayAttachedFile(Uri fileUri) {
-        // Update the UI to display the attached image
-        ImageView attachedImageView = findViewById(R.id.attachedImageView);
-        attachedImageView.setImageURI(null); // Clear existing image
-        attachedImageView.setTag(fileUri); // Set URI as tag
-        attachedImageView.setImageURI(fileUri); // Set image using URI
-    }
-
-    private void openFullScreenImage() {
-        // Get the URI of the attached image
-        ImageView attachedImageView = findViewById(R.id.attachedImageView);
-        Uri imageUri = (Uri) attachedImageView.getTag();
-
-        if (imageUri != null) {
-            // Open the image in a full-screen view
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(imageUri, "image/*");
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "No image attached", Toast.LENGTH_SHORT).show();
-        }
     }
 }

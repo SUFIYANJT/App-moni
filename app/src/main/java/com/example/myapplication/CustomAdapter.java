@@ -61,7 +61,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
                 }
             }
         });
-
         if (isInspecterReview) {
             // For inspector review, show only the image view
             holder.imageView.setVisibility(View.VISIBLE);
