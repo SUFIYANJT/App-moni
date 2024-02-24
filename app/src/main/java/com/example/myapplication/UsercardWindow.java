@@ -35,14 +35,13 @@ import java.util.Objects;
 
 public class UsercardWindow extends AppCompatActivity  {
     private static final int REQUEST_PERMISSION_CODE = 100;
-    private SeekBar seekBar;
+    private MaterialButton seekBar;
     private MediaRecorder mediaRecorder;
 
     private boolean isRecording = false;
     private boolean isPlaying=false;
 
     private TextInputEditText messageInputEditText;
-    ArrayList<PlayerChecker> playerCheckers=new ArrayList<>();
     ArrayList<SubmitHolder> submitHolders=new ArrayList<>();
     RecyclerView recyclerView;
     RecyclerReport recyclerReport;
@@ -56,6 +55,11 @@ public class UsercardWindow extends AppCompatActivity  {
                     Intent data = result.getData();
                     if (data != null) {
                         Uri uri = data.getData();
+                        SubmitHolder submitHolder=new SubmitHolder();
+                        submitHolder.setImageFile(uri);
+                        submitHolder.setMode(1);
+                        submitHolders.add(submitHolder);
+                        recyclerReport.notifyItemInserted(submitHolders.size());
                         assert uri != null;
                         Toast.makeText(this, "File attached: " + uri.getPath(), Toast.LENGTH_SHORT).show();
                         // Display the attached file
@@ -93,31 +97,6 @@ public class UsercardWindow extends AppCompatActivity  {
         voiceMessageButton.setOnClickListener(v -> recordVoiceMessage());
 
         attachmentButton.setOnClickListener(v -> attachFile());
-
-        // Set fixed dimensions for the attached image view
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser){
-                    Log.d(TAG, "onProgressChanged: progress "+progress);
-                    seekBar.setProgress(progress);
-                    isPlaying=false;
-                    if(playerCheckers.size()>0)
-                        playerCheckers.get(playerCheckers.size()-1).stopPlaying(true);
-                  //  playAudio(new File(Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3"),progress);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d(TAG, "onStartTrackingTouch: start touch "+seekBar.getProgress());
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.d(TAG, "onStartTrackingTouch: stop touch "+seekBar.getProgress());
-            }
-        });
         // Set click listener for the attached image view
     }
 
@@ -136,9 +115,13 @@ public class UsercardWindow extends AppCompatActivity  {
         String message = Objects.requireNonNull(messageInputEditText.getText()).toString().trim();
         if (!message.isEmpty()) {
             // Send text message
-            Toast.makeText(this, "Text message sent: " + message, Toast.LENGTH_SHORT).show();
             // Clear the input field after sending
+            SubmitHolder submitHolder=new SubmitHolder();
+            submitHolder.setTextView(messageInputEditText.getText().toString());
+            submitHolder.setMode(3);
+            submitHolders.add(submitHolder);
             messageInputEditText.setText("");
+
         }
     }
 
@@ -166,7 +149,7 @@ public class UsercardWindow extends AppCompatActivity  {
             startRecording();
         }
         private void startRecording(){
-            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3";
+            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message"+submitHolders.size()+".mp3";
             File file=new File(filePath);
             if(!file.exists()) {
                 try {
@@ -206,7 +189,7 @@ public class UsercardWindow extends AppCompatActivity  {
             mediaRecorder = null;
             isRecording = false;
             Toast.makeText(this, "Recording stopped...", Toast.LENGTH_SHORT).show();
-            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message.mp3";
+            String filePath = Objects.requireNonNull(getExternalCacheDir()).getAbsolutePath() + "/voice_message"+submitHolders.size()+".mp3";
             if(ContextCompat.checkSelfPermission(UsercardWindow.this,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED){
                 //playAudio(new File(filePath),0);
                 SubmitHolder submitHolder=new SubmitHolder();
@@ -234,32 +217,7 @@ public class UsercardWindow extends AppCompatActivity  {
 
     public void playAudio(File audioFile,int seek,SeekBar seekBar){
         MediaPlayer mediaPlayer = new MediaPlayer();
-        if (audioFile != null && audioFile.exists()) {
-            try {
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(audioFile.getAbsolutePath());
-                mediaPlayer.prepare();
-                seekBar.setMax(mediaPlayer.getDuration());
-                mediaPlayer.seekTo(seek);
-                mediaPlayer.setVolume(1.0f,1.0f);
-                mediaPlayer.start();
-                isPlaying = true;
-                PlayerChecker playerChecker= new PlayerChecker(mediaPlayer, seekBar);
-                playerChecker.start();
-                playerCheckers.add(playerChecker);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Failed to play recording", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(this, "No recording available to play", Toast.LENGTH_SHORT).show();
-        }
-    }
-    public void StopAudio(int position){
-        playerCheckers.get(position).stopPlaying(true);
-    }
-    public void seekPosition(int position,int progress){
-        playerCheckers.get(position).setProgress(progress);
+
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -268,41 +226,7 @@ public class UsercardWindow extends AppCompatActivity  {
         ItemModel model=new ItemModel();
         model.setArrayListMutableLiveData(submitHolders);
     }
-    static class PlayerChecker extends Thread {
-        MediaPlayer mediaPlayer;
-        boolean isPlaying=true;
-        SeekBar seekBar;
-        PlayerChecker(MediaPlayer mediaPlayer,SeekBar seekBar){
-            this.mediaPlayer=mediaPlayer;
-            this.seekBar=seekBar;
-        }
-        @Override
-        public void run() {
-            while (isPlaying){
-                if(mediaPlayer.getCurrentPosition()==mediaPlayer.getDuration()){
-                    stopPlaying(true);
-                    break;
-                }
-                try {
-                    Thread.sleep(50);
-                    if(mediaPlayer!=null&&mediaPlayer.isPlaying())
-                        seekBar.setProgress(mediaPlayer.getCurrentPosition(),true);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Log.d(TAG, "run: playing running");
-            }
-            mediaPlayer.release();
-            Log.d(TAG, "run: mediaPlayer released ");
-        }
-        public void stopPlaying(boolean isPlaying){
-            this.isPlaying=!isPlaying;
-        }
-        public void setProgress(int progress){
-            this.mediaPlayer.seekTo(progress);
-            this.seekBar.setProgress(progress,true);
-        }
-    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

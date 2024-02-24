@@ -12,12 +12,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.myapplication.network.WebSocketClient;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private TextInputLayout activityNameInputLayout;
+    private TextInputLayout activityDescriptionInputLayout;
     private AutoCompleteTextView autoCompleteTextView;
     private AutoCompleteTextView autoCompleteTextView1;
     private AutoCompleteTextView autoCompleteTextView2;
@@ -35,21 +37,17 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         confirmButton = view.findViewById(R.id.confirmButton);
 
         // Create an ArrayAdapter with the elements "1", "2", "3", and "4"
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line,
-                new String[]{"1", "2", "3", "4"});
-
-        // Set the ArrayAdapter to each AutoCompleteTextView
-        autoCompleteTextView.setAdapter(adapter);
-        autoCompleteTextView1.setAdapter(adapter);
-        autoCompleteTextView2.setAdapter(adapter);
-
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                confirmInput();
-            }
-        });
-
+        ArrayAdapter<String> adapter1 = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line,
+                new String[]{"machine1", "machine2", "machine3", "machine4"});
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line,
+                new String[]{"Component1", "Component2", "Component3", "Component4"});
+        ArrayAdapter<String> adapter3 = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line,
+                new String[]{"Schedule1", "Schedule2", "Schedule3", "Schedule4"});
+        autoCompleteTextView.setAdapter(adapter1);
+        autoCompleteTextView1.setAdapter(adapter2);
+        autoCompleteTextView2.setAdapter(adapter3);
+        confirmButton.setOnClickListener(view1 -> confirmInput());
+        activityDescriptionInputLayout=view.findViewById(R.id.Description);
         return view;
     }
 
@@ -58,16 +56,11 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         if (activityNameInputLayout.getEditText().getText().toString().isEmpty()) {
             activityNameInputLayout.setError("Activity name cannot be empty");
             return;
+        } else if (activityDescriptionInputLayout.getEditText().getText().toString().isEmpty()) {
+            activityDescriptionInputLayout.setError("Insert the Description/Procedure");
         } else {
             activityNameInputLayout.setError(null);
         }
-
-        // Perform other input validations as needed
-
-        // Retrieve selected items from AutoCompleteTextViews
-        // You can now use the selected items as needed
-
-        // Show a confirmation message or perform other actions
         Toast.makeText(requireContext(), "Activity created" ,Toast.LENGTH_SHORT).show();
     }
 }

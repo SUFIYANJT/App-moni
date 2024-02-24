@@ -1,15 +1,22 @@
 package com.example.myapplication;
 
+import static com.example.myapplication.LoginActivity.TAG;
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,38 +26,34 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
     private RecyclerView recyclerView;
     private CustomAdapter adapter;
     private List<ItemModel> itemList;
+    private ItemModel itemModel;
+    ArrayList<Activity> activities=new ArrayList<>();
 
     public ExistingActivity() {
         // Required empty public constructor
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_existing_activity, container, false);
         recyclerView = view.findViewById(R.id.recyclerView);
-
-        // Initialize itemList with dummy data
-        itemList = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            ItemModel model = new ItemModel();
-            model.setItemName("item " + i);
-            itemList.add(model);
-        }
-
-        // Set up RecyclerView
+        itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
+        itemModel.getActivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
+            activities.clear();
+            activities.addAll(newData);
+            Log.d(TAG, "onCreateView: "+newData.size());
+            adapter.notifyDataSetChanged();
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         View emptyView =null;
-        adapter = new CustomAdapter(itemList, false, false);
+        adapter = new CustomAdapter(activities, false, false);
         recyclerView.setAdapter(adapter);
-
-        // Set item click listener
-        adapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(ItemModel item) {
-                // Show popup window
-                MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting();
-                bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
-            }
+        FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
+        adapter.setOnItemClickListener(item -> {
+            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting();
+            bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
         });
 
         return view;
@@ -58,29 +61,15 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
 
     @Override
     public void updateSearchQuery(String query) {
-
-        // Filter the list based on the search query
-
-        List<ItemModel> filteredList = new ArrayList<>();
-
-        for (ItemModel item : itemList) {
-
-            if (item.getItemName().toLowerCase().contains(query.toLowerCase())) {
-
+        List<Activity> filteredList = new ArrayList<>();
+        for (Activity item:activities) {
+            if (item.activityName.toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(item);
-
             }
-
         }
-
-
-        // Update the RecyclerView with the filtered list
-
         adapter.setFilteredList(filteredList);
 
     }
 
-        // Update the RecyclerView with the filtered list
-
-    }
+}
 

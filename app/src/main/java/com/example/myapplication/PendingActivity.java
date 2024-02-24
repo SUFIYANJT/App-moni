@@ -1,6 +1,10 @@
 package com.example.myapplication;
 
+import static com.example.myapplication.LoginActivity.TAG;
+
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,10 +17,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,32 +31,27 @@ import java.util.List;
 public class PendingActivity extends Fragment  implements SearchableFragment{
     List<ItemModel> itemList;
     CustomAdapter customAdapter;
+    ItemModel itemModel;
+    ArrayList<Activity> activities=new ArrayList<>();
+    @SuppressLint("NotifyDataSetChanged")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_pending_activity, container, false);
-
-        // Create dummy data
-
-        itemList = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            ItemModel model = new ItemModel();
-            model.setItemName("item " + i);
-            itemList.add(model);
-        }
-
-        // Set up RecyclerView
+        itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
+        itemModel.getPendingactivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
+            activities.clear();
+            activities.addAll(newData);
+            Log.d(TAG, "onCreateView: "+newData.size());
+            customAdapter.notifyDataSetChanged();
+        });
+        FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewPen);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        // Pass true for isPendingActivity to show progress indicators
-
-        customAdapter = new CustomAdapter(itemList, true, false);
-
+        customAdapter = new CustomAdapter(activities, true, false);
         recyclerView.setAdapter(customAdapter);
-
-        // Inflate the menu
         setHasOptionsMenu(true);
 
         return view;
@@ -73,17 +75,12 @@ public class PendingActivity extends Fragment  implements SearchableFragment{
     @Override
     public void updateSearchQuery(String query) {
         // Filter the list based on the search query
-        List<ItemModel> filteredList = new ArrayList<>();
-        for (ItemModel item : itemList) {
-
-            if (item.getItemName().toLowerCase().contains(query.toLowerCase())) {
-
+        List<Activity> filteredList = new ArrayList<>();
+        for (Activity item:activities) {
+            if (item.activityName.toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(item);
-
             }
-
         }
-        // Update the RecyclerView with the filtered list
         customAdapter.setFilteredList(filteredList);
 
     }

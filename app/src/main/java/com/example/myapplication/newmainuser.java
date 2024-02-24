@@ -11,6 +11,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.CustomAdapter;
 
@@ -24,32 +25,12 @@ public class newmainuser extends AppCompatActivity implements View.OnClickListen
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.newmainuser);
-
-        // Create dummy data
-        List<ItemModel> itemList = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            ItemModel itemModel = new ItemModel();
-            itemModel.setItemName("item " + i);
-            itemList.add(itemModel);
-        }
-
-        // Set up RecyclerView
+        List<Activity> itemList = new ArrayList<>();
         RecyclerView recyclerView = findViewById(R.id.recyclerViewuser);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        // Pass true for isInspecterReview and false for isPendingActivity
         CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
         recyclerView.setAdapter(customAdapter);
-
-        // Example: call showMenu() when a button is clicked
-        findViewById(R.id.menu_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMenu(v);
-            }
-        });
-
-        // Set click listener for MaterialCardView
+        findViewById(R.id.menu_button).setOnClickListener(v -> showMenu(v));
         findViewById(R.id.cardViewUSER).setOnClickListener(this);
     }
 

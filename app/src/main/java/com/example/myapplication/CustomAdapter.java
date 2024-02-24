@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import static com.example.myapplication.LoginActivity.TAG;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,25 +13,26 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.List;
 
 public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
-    private List<ItemModel> itemList;
+    private List<Activity> itemList;
     private OnItemClickListener listener;
     private boolean isPendingActivity;
     private boolean isInspecterReview;
 
-    public void setFilteredList(List<ItemModel> filteredList) {
+    public void setFilteredList(List<Activity> filteredList) {
 
         this.itemList = filteredList;
 
         notifyDataSetChanged();
 
     }
-    public CustomAdapter(List<ItemModel> itemList, boolean isPendingActivity, boolean isInspecterReview) {
+    public CustomAdapter(List<Activity> itemList, boolean isPendingActivity, boolean isInspecterReview) {
         this.itemList = itemList;
         this.isPendingActivity = isPendingActivity;
         this.isInspecterReview = isInspecterReview;
@@ -39,7 +43,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
 
     public interface OnItemClickListener {
-        void onItemClick(ItemModel item);
+        void onItemClick(Activity item);
     }
 
     @NonNull
@@ -51,19 +55,17 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ItemModel item = itemList.get(position);
-        holder.textView.setText(item.getItemName());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                    listener.onItemClick(item);
-                }
+        Activity item = itemList.get(position);
+        holder.textView.setText(item.activityName);
+        holder.itemView.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onItemClick(item);
             }
         });
         if (isInspecterReview) {
             // For inspector review, show only the image view
             holder.imageView.setVisibility(View.VISIBLE);
+            Log.d(TAG, "onBindViewHolder: inspectorReview rendering");
             holder.linearProgressIndicator.setVisibility(View.GONE);
         } else {
             // For other cases, show both image view and linear progress indicator
