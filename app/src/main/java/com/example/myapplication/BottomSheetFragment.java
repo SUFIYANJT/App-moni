@@ -49,6 +49,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     MachineAdapter component;
     MachineAdapter schedule;
     ItemModel itemModel;
+    MachinePreference machinePreference;
     BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -89,16 +90,25 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         machines = new ArrayList<>();
         components = new ArrayList<>();
         schedules = new ArrayList<>();
-        machine = new MachineAdapter(requireContext(),machines);
-        component = new MachineAdapter(requireContext(),components);
-        schedule = new MachineAdapter(requireContext(),schedules);
+
         autoCompleteTextView.setAdapter(machine);
         autoCompleteTextView1.setAdapter(component);
         autoCompleteTextView2.setAdapter(schedule);
+        machinePreference=new MachinePreference(requireContext().getApplicationContext());
+        machines=machinePreference.getMachines("machine");
+        components=machinePreference.getMachines("component");
+        schedules=machinePreference.getMachines("schedule");
+        machine = new MachineAdapter(requireContext(),machines);
+        component = new MachineAdapter(requireContext(),components);
+        schedule = new MachineAdapter(requireContext(),schedules);
+        if(machines.size()==0&&components==null&&schedules==null) {
+            Log.d(TAG, "onCreateView: all are null ");
+            MyForegroundService.foregroundService.getComponent();
+            MyForegroundService.foregroundService.getMachine();
+            MyForegroundService.foregroundService.getSchedule();
+        }else{
 
-        MyForegroundService.foregroundService.getComponent();
-        MyForegroundService.foregroundService.getMachine();
-        MyForegroundService.foregroundService.getSchedule();
+        }
         confirmButton.setOnClickListener(view1 -> confirmInput());
         activityDescriptionInputLayout=view.findViewById(R.id.Description);
         return view;

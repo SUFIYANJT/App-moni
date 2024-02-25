@@ -136,7 +136,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d(TAG, "onCreate: checking auth ");
                     // Perform login operation (replace this with your actual login logic)
                     Snackbar.make(findViewById(R.id.parent), "Authenticating", Snackbar.LENGTH_SHORT).show();
-                    WebSocketClient webSocketClient=new WebSocketClient(this,new MyForegroundService());
+                    WebSocketClient webSocketClient=new WebSocketClient(this);
                     webSocketClient.connect();
                     webSocketClient.Auth(username,password);
                 }

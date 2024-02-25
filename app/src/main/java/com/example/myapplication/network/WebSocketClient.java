@@ -51,6 +51,14 @@ public class WebSocketClient extends WebSocketListener {
         this.foregroundService=foregroundService;
 
     }
+    public WebSocketClient(Context context){
+        OkHttpClient okHttpClient=new OkHttpClient();
+        Request request=new Request.Builder()
+                .url("ws://192.168.43.174:8000/chat/")
+                .build();
+        webSocket=okHttpClient.newWebSocket(request,this);
+        this.context=context;
+    }
 
     public void connect(){
         OkHttpClient okHttpClient=new OkHttpClient();
