@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.myapplication.Support.Machine;
+import com.example.myapplication.Support.MachinePreference;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MachineAdapter;
 import com.example.myapplication.service.MyForegroundService;
@@ -51,20 +52,23 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            MachinePreference machinePreference = new MachinePreference(context);
             String type=intent.getStringExtra("type");
             Machine data=(Machine) intent.getSerializableExtra("data");
             Log.d(TAG, "onReceive: Receiving data from background of type "+type);
             if(Objects.equals(type, "machine")){
                 machines.add(data);
+                machinePreference.saveMachines("machine",machines);
                 machine.notifyDataSetChanged();
                 Log.d(TAG, "onReceive: machine data are "+machines.size());
             } else if (Objects.requireNonNull(type).equals("component")) {
                 components.add(data);
+                machinePreference.saveMachines("component",machines);
                 component.notifyDataSetChanged();
                 Log.d(TAG, "onReceive: component data are "+components.size());
             } else if (type.equals("schedule")) {
                 schedules.add(data);
+                machinePreference.saveMachines("schedule",machines);
                 schedule.notifyDataSetChanged();
                 Log.d(TAG, "onReceive: schedule data are "+schedules.size());
             }
@@ -91,6 +95,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         autoCompleteTextView.setAdapter(machine);
         autoCompleteTextView1.setAdapter(component);
         autoCompleteTextView2.setAdapter(schedule);
+
         MyForegroundService.foregroundService.getComponent();
         MyForegroundService.foregroundService.getMachine();
         MyForegroundService.foregroundService.getSchedule();
@@ -114,7 +119,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             autoCompleteTextView2.setError("select a schedule ");
         }
         Toast.makeText(requireContext(), "Activity created" ,Toast.LENGTH_SHORT).show();
-
     }
 
     @Override

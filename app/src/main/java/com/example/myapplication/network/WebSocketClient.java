@@ -186,9 +186,11 @@ public class WebSocketClient extends WebSocketListener {
             Log.d(TAG, "onOpen: no need for authentication already signed in ");
             getExistingActivity();
         }else{
-            Log.d(TAG, "onOpen: no need for authentication stopping service ");
-            foregroundService.stopForeground(true);
-            foregroundService.stopSelf();
+            if(foregroundService!=null) {
+                Log.d(TAG, "onOpen: no need for authentication stopping service ");
+                foregroundService.stopForeground(true);
+                foregroundService.stopSelf();
+            }
         }
     }
 

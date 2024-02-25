@@ -209,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         bottomSheetFragment = new BottomSheetFragment();
         fab.setOnClickListener(view -> {
+            Log.d(TAG, "onCreate: clicked the to open/close the bottom sheet fragment ");
             if (bottomSheetFragment.isVisible()) {
                 bottomSheetFragment.dismiss();
             } else {

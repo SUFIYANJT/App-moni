@@ -167,7 +167,7 @@ public class MyForegroundService extends Service implements NetworkConnector {
         webSocketClient.getComponents();
     }
     public void CreateActivity(Activity activity){
-
+        webSocketClient.CreateActivity(activity);
     }
 
     @Override
