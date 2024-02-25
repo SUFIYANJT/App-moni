@@ -183,9 +183,10 @@ public class MainActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             } else {
-                // Register the broadcast receiver without specifying receiverPermission
                 registerReceiver(broadcastReceiver, filter);
             }
+        }else{
+            registerReceiver(broadcastReceiver, filter);
         }
         if (isServiceRunning(MyForegroundService.class)) {
             ContextCompat.startForegroundService(MainActivity.this, serviceIntent);

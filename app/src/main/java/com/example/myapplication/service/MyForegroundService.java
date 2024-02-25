@@ -34,17 +34,21 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStore;
 import androidx.lifecycle.ViewModelStoreOwner;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.NetworkConnector;
 import com.example.myapplication.R;
 import com.example.myapplication.Support.Activity;
+import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.User;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.network.WebSocketClient;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
+
+import javax.crypto.Mac;
 
 public class MyForegroundService extends Service implements NetworkConnector {
     public static MyForegroundService foregroundService;
@@ -89,6 +93,42 @@ public class MyForegroundService extends Service implements NetworkConnector {
         }
         sendBroadcast(intent);
     }
+
+    public void setComponent(Machine machine,boolean isUpdate){
+        Intent intent = new Intent("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
+        intent.putExtra("data", (Serializable) machine);
+        intent.putExtra("type","machine");
+        if(!isUpdate) {
+            intent.putExtra("change","create");
+        }else{
+            intent.putExtra("change","update");
+        }
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+    public void setMachine(Machine machine,boolean isUpdate){
+        Log.d(TAG, "setMachine: is called for updating ui ");
+        Intent intent = new Intent("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
+        intent.putExtra("data", (Serializable) machine);
+        intent.putExtra("type","component");
+        if(!isUpdate) {
+            intent.putExtra("change","create");
+        }else{
+            intent.putExtra("change","update");
+        }
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+    public void setSchedule(Machine machine,boolean isUpdate){
+        Log.d(TAG, "setSchedule: is called for updating ui ");
+        Intent intent = new Intent("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
+        intent.putExtra("data", (Serializable) machine);
+        intent.putExtra("type","schedule");
+        if(!isUpdate) {
+            intent.putExtra("change","create");
+        }else{
+            intent.putExtra("change","update");
+        }
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
     public void setUser(User user){
         this.user=user;
         Intent intent = new Intent("com.example.ACTION_SEND_DATA");
@@ -116,7 +156,19 @@ public class MyForegroundService extends Service implements NetworkConnector {
             startForeground(1, notification);
         }
     }
+    public void getSchedule(){
+        webSocketClient.getSchedules();
+    }
+    public void getMachine(){
+        Log.d(TAG, "getMachine: called for machine data ");
+        webSocketClient.getMachines();
+    }
+    public void getComponent(){
+        webSocketClient.getComponents();
+    }
+    public void CreateActivity(Activity activity){
 
+    }
 
     @Override
     public void onDestroy() {

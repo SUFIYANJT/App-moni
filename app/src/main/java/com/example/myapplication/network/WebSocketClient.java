@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.myapplication.LoginActivity;
 import com.example.myapplication.Support.Activity;
+import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
@@ -96,6 +97,86 @@ public class WebSocketClient extends WebSocketListener {
         }
         Log.d(TAG, "Auth: json converted data "+ jsonObject +" "+password+" "+user);
             return webSocket.send(jsonObject.toString());
+    }
+    public void getSchedules(){
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("password",user.getPassword());
+                jsonObject.put("usermode",user.getUsermode());
+                jsonObject.put("schedule","schedule");
+                webSocket.send(jsonObject.toString());
+            }else{
+                Log.d(TAG, "getSchedules: User not defined yet ");
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "Auth: ",e);;
+        }
+    }
+    public void CreateActivity(Activity activity){
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("password",user.getPassword());
+                jsonObject.put("usermode",user.getUsermode());
+                jsonObject.put("create","create");
+                JSONObject activityData=new JSONObject();
+                activityData.put("activity_id",activity.activityId);
+                activityData.put("activity_description",activity.activityDescription);
+                activityData.put("activity_name",activity.activityName);
+                activityData.put("activity_issued_date",activity.issued_date);
+                activityData.put("activity_machine_id",activity.machineId);
+                activityData.put("activity_component_id",activity.componentId);
+                activityData.put("activity_schedule_id",activity.componentId);
+                activityData.put("activity_status_id",activity.activity_satuts_id);
+                webSocket.send(jsonObject.toString());
+            }else{
+                Log.d(TAG, "getSchedules: User not defined yet ");
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "Auth: ",e);;
+        }
+    }
+
+    public void getComponents(){
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("password",user.getPassword());
+                jsonObject.put("usermode",user.getUsermode());
+                jsonObject.put("component","component");
+                webSocket.send(jsonObject.toString());
+            }else{
+                Log.d(TAG, "getSchedules: User not defined yet ");
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "Auth: ",e);;
+        }
+    }
+
+    public void getMachines(){
+        Log.d(TAG, "getMachines: sending request from machine ");
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("password",user.getPassword());
+                jsonObject.put("usermode",user.getUsermode());
+                jsonObject.put("machine","machine");
+                webSocket.send(jsonObject.toString());
+            }else{
+                Log.d(TAG, "getSchedules: User not defined yet ");
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "Auth: ",e);;
+        }
     }
 
     @Override
@@ -239,6 +320,35 @@ public class WebSocketClient extends WebSocketListener {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        } else if (text.contains("type")) {
+            try {
+                JSONObject jsonObject=new JSONObject(text);
+                int id=jsonObject.getInt("id");
+                String type=jsonObject.getString("type");
+                String name=jsonObject.getString("name");
+                if(type.equals("machine")){
+                    Machine machine=new Machine();
+                    machine.setName(name);
+                    machine.setId(id);
+                    foregroundService.setMachine(machine,false);
+                } else if (type.equals("component")) {
+                    Machine component=new Machine();
+                    component.setId(id);
+                    component.setName(name);
+                    foregroundService.setComponent(component,false);
+                } else if (type.equals("schedule")) {
+                    Log.d(TAG, "onMessage: schedule object got from the server ");
+                    Machine schedule=new Machine();
+                    schedule.setId(id);
+                    schedule.setName(name);
+                    schedule.setValue(jsonObject.getInt("value"));
+                    schedule.setCurrentvalue(jsonObject.getInt("current"));
+                    foregroundService.setSchedule(schedule,false);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
