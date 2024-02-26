@@ -7,4 +7,6 @@
     <string name="sender">sender</string>
     <string name="receiver">Receiver</string>
     <string name="submit">submit</string>
+    <string name="edit_activity">Edit Activity</string>
+    <string name="employee_s_name">Employee’s name</string>
 </resources>

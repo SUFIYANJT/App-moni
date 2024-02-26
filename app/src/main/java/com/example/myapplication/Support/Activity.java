@@ -7,6 +7,7 @@ public class Activity implements Serializable {
     public int activityId;
     public String activityDescription;
     public int activity_satuts_id;
+    public int assigned_to;
     public int componentId;
     public int machineId;
     public int scheduleId;

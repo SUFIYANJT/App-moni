@@ -133,7 +133,6 @@ public class WebSocketClient extends WebSocketListener {
                 jsonObject.put("usermode",user.getUsermode());
                 jsonObject.put("create","create");
                 JSONObject activityData=new JSONObject();
-                activityData.put("activity_id",activity.activityId);
                 activityData.put("activity_description",activity.activityDescription);
                 activityData.put("activity_name",activity.activityName);
                 activityData.put("activity_issued_date",activity.issued_date);
@@ -141,6 +140,35 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_component_id",activity.componentId);
                 activityData.put("activity_schedule_id",activity.componentId);
                 activityData.put("activity_status_id",activity.activity_satuts_id);
+                jsonObject.put("activity",activityData);
+                webSocket.send(jsonObject.toString());
+            }else{
+                Log.d(TAG, "getSchedules: User not defined yet ");
+            }
+        } catch (JSONException e) {
+            Log.d(TAG, "Auth: ",e);;
+        }
+    }
+    public void updateActivity(Activity activity){
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("password",user.getPassword());
+                jsonObject.put("usermode",user.getUsermode());
+                jsonObject.put("update","update");
+                JSONObject activityData=new JSONObject();
+                activityData.put("activity_description",activity.activityDescription);
+                activityData.put("activity_name",activity.activityName);
+                activityData.put("activity_issued_date",activity.issued_date);
+                activityData.put("activity_machine_id",activity.machineId);
+                activityData.put("activity_component_id",activity.componentId);
+                activityData.put("activity_schedule_id",activity.componentId);
+                activityData.put("activity_status_id",activity.activity_satuts_id);
+                activityData.put("activity_id",activity.activityId);
+                activityData.put("activity_assigned_to",activity.assigned_to);
+                jsonObject.put("activity",activityData);
                 webSocket.send(jsonObject.toString());
             }else{
                 Log.d(TAG, "getSchedules: User not defined yet ");
@@ -359,9 +387,46 @@ public class WebSocketClient extends WebSocketListener {
                 e.printStackTrace();
             }
 
+        } else if (text.contains("callback")) {
+            try {
+                JSONObject jsonObject=new JSONObject(text);
+                String callback=jsonObject.getString("callback");
+                if(callback.equals("create")){
+                    Log.d(TAG, "onMessage: callback is "+callback);
+                    foregroundService.updateUi();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        } else if (text.contains("username")&&text.contains("userid")) {
+            try {
+                JSONObject jsonObject=new JSONObject(text);
+                String username=jsonObject.getString("username");
+                String key=jsonObject.getString("key");
+                int user_id=jsonObject.getInt("userid");
+                User user=new User(username,"password","B");
+                user.setUser_id(user_id);
+                Log.d(TAG, "onMessage: "+key+" "+user.getUsername());
+                foregroundService.setUsers(user,key);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
-
+    public void getUsers(CharSequence sequence){
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            jsonObject.put("username",user.getUsername());
+            jsonObject.put("password",user.getPassword());
+            jsonObject.put("usermode",user.getUsermode());
+            jsonObject.put("users",sequence);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        webSocket.send(jsonObject.toString());
+    }
     @Override
     public void onClosed(@NonNull WebSocket webSocket, int code, @NonNull String reason) {
         Log.d(TAG, "onClosed: websocket closed connection ");

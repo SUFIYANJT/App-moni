@@ -45,6 +45,6 @@ public class Machine implements Serializable {
     @NonNull
     @Override
     public String toString() {
-        return this.name;
+        return this.name+" "+getId();
     }
 }

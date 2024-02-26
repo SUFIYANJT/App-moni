@@ -7,6 +7,13 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="16dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_activity"
+        android:layout_marginBottom="20dp"
+        android:textSize="30dp"
+        />
 
     <!-- Activity Name -->
     <com.google.android.material.textfield.TextInputLayout
@@ -25,15 +32,18 @@
 
     </com.google.android.material.textfield.TextInputLayout>
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/EmployeeNameTextInput"
+        android:id="@+id/empolyeeDropdownTextInput"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:errorEnabled="true">
-    <com.google.android.material.textfield.TextInputEditText
-    android:id="@+id/EmployeeNameEditText1"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="Employee’s name" />
+        android:hint="Employee Name">
+
+        <AutoCompleteTextView
+            android:id="@+id/EmployeeNameEditText1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"/>
+
     </com.google.android.material.textfield.TextInputLayout>
     <!-- Description -->
     <com.google.android.material.textfield.TextInputLayout
@@ -100,7 +110,6 @@
             android:layout_marginBottom="16dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Confirm Button -->
     <Button
         android:id="@+id/confirmButton1"
         android:layout_width="match_parent"

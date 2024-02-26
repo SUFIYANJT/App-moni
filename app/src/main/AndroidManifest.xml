@@ -10,6 +10,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+
 
 
     <!-- Declaration for camera hardware feature -->
@@ -68,6 +73,14 @@
 
         <!-- Correct declaration for UsercardWindow activity -->
         <activity android:name=".UsercardWindow" />
+        <receiver android:name=".model.MyBroadcastReceiver"
+            android:exported="true"
+            tools:ignore="Instantiatable">
+            <intent-filter>
+                <action android:name="com.example.ACTION_SEND_DATA" />
+            </intent-filter>
+        </receiver>
+
 
     </application>
 

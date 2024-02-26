@@ -20,18 +20,22 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.MachinePreference;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MachineAdapter;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
@@ -42,72 +46,68 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private AutoCompleteTextView autoCompleteTextView1;
     private AutoCompleteTextView autoCompleteTextView2;
     private Button confirmButton;
-    private ArrayList<Machine> machines;
-    private  ArrayList<Machine> components;
-    private ArrayList<Machine> schedules;
+    View view;
+    private ArrayList<Machine> machines = new ArrayList<>();
+    private  ArrayList<Machine> components = new ArrayList<>();
+    private ArrayList<Machine> schedules = new ArrayList<>();
+    ItemModel itemModel;
     MachineAdapter machine;
     MachineAdapter component;
     MachineAdapter schedule;
-    ItemModel itemModel;
-    MachinePreference machinePreference;
     BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            MachinePreference machinePreference = new MachinePreference(context);
+            itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
             String type=intent.getStringExtra("type");
-            Machine data=(Machine) intent.getSerializableExtra("data");
-            Log.d(TAG, "onReceive: Receiving data from background of type "+type);
-            if(Objects.equals(type, "machine")){
-                machines.add(data);
-                machinePreference.saveMachines("machine",machines);
-                machine.notifyDataSetChanged();
-                Log.d(TAG, "onReceive: machine data are "+machines.size());
-            } else if (Objects.requireNonNull(type).equals("component")) {
-                components.add(data);
-                machinePreference.saveMachines("component",machines);
-                component.notifyDataSetChanged();
-                Log.d(TAG, "onReceive: component data are "+components.size());
-            } else if (type.equals("schedule")) {
-                schedules.add(data);
-                machinePreference.saveMachines("schedule",machines);
-                schedule.notifyDataSetChanged();
-                Log.d(TAG, "onReceive: schedule data are "+schedules.size());
+            if(type.equals("ui")){
+
+                Snackbar.make(view,"Activity Created",Snackbar.LENGTH_SHORT).show();
+            }else {
+
+                Machine data = (Machine) intent.getSerializableExtra("data");
+                Log.d(TAG, "onReceive: Receiving data from background of type " + type);
+                if (Objects.equals(type, "machine")) {
+                    machines.add(data);
+                    itemModel.setMachineMutableLiveData(machines);
+                    machine.notifyDataSetChanged();
+                    Log.d(TAG, "onReceive: machine data are " + machines.size());
+                } else if (Objects.requireNonNull(type).equals("component")) {
+                    components.add(data);
+                    itemModel.setComponentMutableLiveData(components);
+                    component.notifyDataSetChanged();
+                    Log.d(TAG, "onReceive: component data are " + components.size());
+                } else if (type.equals("schedule")) {
+                    schedules.add(data);
+                    itemModel.setScheduleMutableLiveData(schedules);
+                    schedule.notifyDataSetChanged();
+                    Log.d(TAG, "onReceive: schedule data are " + schedules.size());
+                }
             }
         }
     };
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.bottom_sheet_layout, container, false);
+
+        view = inflater.inflate(R.layout.bottom_sheet_layout, container, false);
         activityNameInputLayout = view.findViewById(R.id.Acivity_name);
         autoCompleteTextView = view.findViewById(R.id.autoCompleteTextView);
         autoCompleteTextView1 = view.findViewById(R.id.autoCompleteTextView1);
         autoCompleteTextView2 = view.findViewById(R.id.autoCompleteTextView2);
         confirmButton = view.findViewById(R.id.confirmButton);
-        IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
-        LocalBroadcastManager.getInstance(requireContext().getApplicationContext()).registerReceiver(broadcastReceiver, filter);
-        machines = new ArrayList<>();
-        components = new ArrayList<>();
-        schedules = new ArrayList<>();
-
-        autoCompleteTextView.setAdapter(machine);
-        autoCompleteTextView1.setAdapter(component);
-        autoCompleteTextView2.setAdapter(schedule);
-        machinePreference=new MachinePreference(requireContext().getApplicationContext());
-        machines=machinePreference.getMachines("machine");
-        components=machinePreference.getMachines("component");
-        schedules=machinePreference.getMachines("schedule");
         machine = new MachineAdapter(requireContext(),machines);
         component = new MachineAdapter(requireContext(),components);
         schedule = new MachineAdapter(requireContext(),schedules);
-        if(machines.size()==0&&components==null&&schedules==null) {
+        IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
+        LocalBroadcastManager.getInstance(requireContext().getApplicationContext()).registerReceiver(broadcastReceiver, filter);
+        autoCompleteTextView.setAdapter(machine);
+        autoCompleteTextView1.setAdapter(component);
+        autoCompleteTextView2.setAdapter(schedule);
+        if(machines.size()==0&&components.size()==0&&schedules.size()==0) {
             Log.d(TAG, "onCreateView: all are null ");
             MyForegroundService.foregroundService.getComponent();
             MyForegroundService.foregroundService.getMachine();
             MyForegroundService.foregroundService.getSchedule();
-        }else{
-
         }
         confirmButton.setOnClickListener(view1 -> confirmInput());
         activityDescriptionInputLayout=view.findViewById(R.id.Description);
@@ -128,7 +128,22 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         } else if (autoCompleteTextView2.getText().toString().isEmpty()) {
             autoCompleteTextView2.setError("select a schedule ");
         }
-        Toast.makeText(requireContext(), "Activity created" ,Toast.LENGTH_SHORT).show();
+       // Toast.makeText(requireContext(), "Activity created" ,Toast.LENGTH_SHORT).show();
+        Activity activity=new Activity();
+        activity.activityName=activityNameInputLayout.getEditText().getText().toString();
+        activity.activityDescription=activityDescriptionInputLayout.getEditText().getText().toString();
+        activity.activity_satuts_id=1;
+        int lengthm=autoCompleteTextView.getText().toString().length();
+        int lengthc=autoCompleteTextView1.getText().toString().length();
+        int lengths=autoCompleteTextView2.getText().toString().length();
+        activity.machineId= Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm-1)));
+        activity.componentId= Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc-1)));
+        activity.scheduleId= Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths-1)));
+        Log.d(TAG, "confirmInput: ");
+        Date date=new Date();
+        activity.issued_date= String.valueOf(date.getTime());
+        MyForegroundService.foregroundService.CreateActivity(activity);
+        this.dismiss();
     }
 
     @Override

@@ -4,7 +4,25 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dbef21d0-4c9b-4545-84d9-b3f73f3d082c" name="Changes" comment="" />
+    <list default="true" id="dbef21d0-4c9b-4545-84d9-b3f73f3d082c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/model/MyBroadcastReceiver.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/model/UserAdapter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/BottomSheetFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/BottomSheetFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/ExistingActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/ExistingActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/LoginActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/LoginActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/MyBottomSheetFragmentExixting.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/MyBottomSheetFragmentExixting.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/Activity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/Activity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/Machine.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/Machine.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/MachinePreference.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/MachinePreference.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/Support/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/model/ItemModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/model/ItemModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/network/WebSocketClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/network/WebSocketClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/service/MyForegroundService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/java/com/example/myapplication/service/MyForegroundService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/res/layout/bottom_sheet_layout_exixting.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/res/layout/bottom_sheet_layout_exixting.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../app/src/main/res/values/strings.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,7 +32,7 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="ProjectId" id="2cGMASRXD51JHT6SwtyObQheiLV" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -31,7 +49,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/acer/StudioProjects"
+    "last_opened_file_path": "/home/acer/StudioProjects/application32"
   }
 }]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />

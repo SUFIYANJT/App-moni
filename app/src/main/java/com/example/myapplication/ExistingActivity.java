@@ -52,7 +52,7 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
         adapter.setOnItemClickListener(item -> {
-            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting();
+            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item);
             bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
         });
 

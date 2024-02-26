@@ -4,6 +4,7 @@ import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
 
 import static com.example.myapplication.service.MyForegroundService.no_of_running_service;
 
+import android.Manifest;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -22,20 +24,24 @@ import android.view.View;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
+import com.example.myapplication.model.MyBroadcastReceiver;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -50,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    int BLUETOOTH_PERMISSION=104;
     private FloatingActionButton fab;
     private BottomSheetFragment bottomSheetFragment;
     MyForegroundService foreground;
@@ -59,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<Activity> IssuedActivities=new ArrayList<>();
     ArrayList<Activity> PendingActivities=new ArrayList<>();
     ArrayList<Activity> ReviewActivities=new ArrayList<>();
-    private static final String TAG = "MainActivity"; // Or any appropriate tag name
+    private static final String TAG = "MainActivity";
     ItemModel itemModel;
     private ServiceConnection serviceConnection = new ServiceConnection() {
         private ComponentName name;
@@ -100,6 +107,11 @@ public class MainActivity extends AppCompatActivity {
                             ExistingActivities.set(i, activity);
                             Log.d(TAG, "onReceive: Updated activity: " + activity.activityName);
                             break;
+                        }
+                        if(context instanceof MainActivity){
+                            MainActivity activity1=(MainActivity) context;
+                           // Snackbar.make(activity1.findViewById(R.id.parent),"New Activity created",Snackbar.LENGTH_SHORT).show();
+                            Toast.makeText(context,"New activity created",Toast.LENGTH_SHORT).show();
                         }
                         i++;
                     }
@@ -176,26 +188,6 @@ public class MainActivity extends AppCompatActivity {
         itemModel=new ViewModelProvider(this).get(ItemModel.class);
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.viewPager);
-        Log.d(TAG, "onCreate: checking service bound ");
-        serviceIntent = new Intent(this, MyForegroundService.class);
-        IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-            } else {
-                registerReceiver(broadcastReceiver, filter);
-            }
-        }else{
-            registerReceiver(broadcastReceiver, filter);
-        }
-        if (isServiceRunning(MyForegroundService.class)) {
-            ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
-            bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-            Log.d(TAG, "onCreate: starting the service because no service found ");
-        } else {
-            Log.d(TAG, "onCreate: service is running call for data from server");
-            MyForegroundService.foregroundService.getExistingActivity();
-        }
         fab = findViewById(R.id.fab);
         FragmentAdapter fragmentAdapter = new FragmentAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         fragmentAdapter.addFragment(new ExistingActivity(), "Existing Activity");
@@ -216,7 +208,76 @@ public class MainActivity extends AppCompatActivity {
                 bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
             }
         });
+        permissionCall();
+        // Check if the permission is not granted
+
     }
+    public void permissionCall(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "onCreate: Trying to grant permission ");
+            // Request the permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                String[] permissions = {Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH_CONNECT};
+                ActivityCompat.requestPermissions(this, permissions, BLUETOOTH_PERMISSION);
+            }
+        } else {
+            startService();
+        }
+    }
+    public void startService(){
+        Log.d(TAG, "onCreate: checking service bound ");
+        serviceIntent = new Intent(this, MyForegroundService.class);
+        IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA");
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            //MyBroadcastReceiver myBroadcastReceiver=new MyBroadcastReceiver(ExistingActivities,IssuedActivities,PendingActivities,ReviewActivities,itemModel,this);
+            //registerReceiver(myBroadcastReceiver,filter, Context.RECEIVER_NOT_EXPORTED);
+            LocalBroadcastManager.getInstance(this.getApplicationContext()).registerReceiver(broadcastReceiver,filter);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(broadcastReceiver, filter);
+            }
+        }else{
+            registerReceiver(broadcastReceiver, filter);
+        }
+        if (isServiceRunning(MyForegroundService.class)) {
+            ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
+            bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            Log.d(TAG, "onCreate: starting the service because no service found ");
+        } else {
+            Log.d(TAG, "onCreate: service is running call for data from server");
+            MyForegroundService.foregroundService.getExistingActivity();
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Log.d(TAG, "onRequestPermissionsResult: calling for permission result ");
+        if (requestCode == BLUETOOTH_PERMISSION) {
+            // Check if the permission has been granted
+
+            for (int permission:
+                 grantResults) {
+                if (permission != PackageManager.PERMISSION_GRANTED) {
+                    permissionCall();
+                }
+            }
+            Log.d(TAG, "onRequestPermissionsResult: all permission granted starting service ");
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                Log.d(LoginActivity.TAG, "createNotificationChannel: permission not granted ");
+                permissionCall();
+            }else {
+                startService();
+            }
+        }
+    }
+
+
 
     public boolean isServiceRunning(Class<?> serviceClass) {
         Log.d(TAG, "isServiceRunning: Called to check if a service is running "+no_of_running_service);
@@ -269,20 +330,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateFragmentSearchQuery(String query) {
-
         // Update each fragment with the new search query
-
         for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-
             if (fragment instanceof SearchableFragment) {
-
                 ((SearchableFragment) fragment).updateSearchQuery(query);
-
             }
 
         }
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this.getApplicationContext()).unregisterReceiver(broadcastReceiver);
+    }
 }
 

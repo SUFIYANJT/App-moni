@@ -1,18 +1,16 @@
 package com.example.myapplication.Support;
+
+import static com.example.myapplication.LoginActivity.TAG;
+
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import android.content.Context;
-import android.content.SharedPreferences;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MachinePreference {
     private static final String PREF_NAME = "MachinePrefs";
@@ -26,6 +24,7 @@ public class MachinePreference {
 
     public void saveMachines(String key, ArrayList<Machine> machines) {
         String machinesJson = gson.toJson(machines);
+        Log.d(TAG, "saveMachines: casted to string "+machinesJson);
         sharedPreferences.edit().putString(key, machinesJson).apply();
     }
 
@@ -33,9 +32,12 @@ public class MachinePreference {
         String machinesJson = sharedPreferences.getString(key, null);
         if (machinesJson != null) {
             Type type = new TypeToken<ArrayList<Machine>>() {}.getType();
-            return gson.fromJson(machinesJson, type);
+            ArrayList<Machine> machines=gson.fromJson(machinesJson, type);
+            Log.d(TAG, "getMachines: machines "+machines.get(0).getName());
+            return machines;
         }
         return new ArrayList<>(); // Return empty ArrayList if no data found
     }
 }
+
 
