@@ -20,6 +20,7 @@ public class ItemModel extends ViewModel {
     private String name;
     public MutableLiveData<ArrayList<User>> userMutableLiveData=new MutableLiveData<>();
     private MutableLiveData<Long> liveDataExample = new MutableLiveData<>();
+    private MutableLiveData<Integer> integerMutableLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Machine>> MachineMutableLiveData=new MutableLiveData<>();
     private MutableLiveData<ArrayList<Machine>> ComponentMutableLiveData=new MutableLiveData<>();
     private MutableLiveData<ArrayList<Machine>> ScheduleMutableLiveData=new MutableLiveData<>();
@@ -28,6 +29,7 @@ public class ItemModel extends ViewModel {
     private MutableLiveData<ArrayList<Activity>> PendingactivityMutableLiveData=new MutableLiveData<>();
     private MutableLiveData<ArrayList<Activity>> ReviewactivityMutableLiveData=new MutableLiveData<>();
     private MutableLiveData<ArrayList<SubmitHolder>> arrayListMutableLiveData=new MutableLiveData<>();
+    private MutableLiveData<String> callBack=new MutableLiveData<>();
 
     public void setItemName(String itemName) {
         this.name = itemName;
@@ -61,6 +63,11 @@ public class ItemModel extends ViewModel {
 
     public boolean setActivityMutableLiveData(ArrayList<Activity> activity) {
         this.activityMutableLiveData.postValue(activity);
+        return activity!=activityMutableLiveData.getValue();
+    }
+
+    public boolean setActivityMutableLiveDatas(ArrayList<Activity> activity) {
+        this.activityMutableLiveData.setValue(activity);
         return activity!=activityMutableLiveData.getValue();
     }
 
@@ -119,5 +126,21 @@ public class ItemModel extends ViewModel {
     }
     public MutableLiveData<ArrayList<User>> getUserMutableLiveData(){
         return userMutableLiveData;
+    }
+
+    public MutableLiveData<String> getCallBack() {
+        return callBack;
+    }
+
+    public void setCallBack(String callBack) {
+        this.callBack.postValue(callBack);
+    }
+
+    public MutableLiveData<Integer> getIntegerMutableLiveData() {
+        return integerMutableLiveData;
+    }
+
+    public void setIntegerMutableLiveData(Integer integerMutableLiveData) {
+        this.integerMutableLiveData.setValue(integerMutableLiveData);
     }
 }

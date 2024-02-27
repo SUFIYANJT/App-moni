@@ -73,7 +73,7 @@ public class WebSocketClient extends WebSocketListener {
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         JSONObject jsonObject=new JSONObject();
         User user=UserPreferences.getUser(context.getApplicationContext());
@@ -140,6 +140,7 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_component_id",activity.componentId);
                 activityData.put("activity_schedule_id",activity.componentId);
                 activityData.put("activity_status_id",activity.activity_satuts_id);
+                activityData.put("assigned_to_user",activity.assigned_to_user);
                 jsonObject.put("activity",activityData);
                 webSocket.send(jsonObject.toString());
             }else{
@@ -168,6 +169,7 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_status_id",activity.activity_satuts_id);
                 activityData.put("activity_id",activity.activityId);
                 activityData.put("activity_assigned_to",activity.assigned_to);
+                activityData.put("assigned_to_user",activity.assigned_to_user);
                 jsonObject.put("activity",activityData);
                 webSocket.send(jsonObject.toString());
             }else{
@@ -220,7 +222,7 @@ public class WebSocketClient extends WebSocketListener {
         User user=UserPreferences.getUser(context.getApplicationContext());
         if(user!=null){
             Log.d(TAG, "onOpen: no need for authentication already signed in ");
-            getExistingActivity();
+                getExistingActivity();
         }else{
             if(foregroundService!=null) {
                 Log.d(TAG, "onOpen: no need for authentication stopping service ");
@@ -269,6 +271,9 @@ public class WebSocketClient extends WebSocketListener {
                 int scheduleId=jsonObject.getInt("activity_schedule_id");
                 String activityName=jsonObject.getString("activity_name");
                 String issued_date=jsonObject.getString("activity_issued_date");
+                int activityAssignedId = jsonObject.getInt("assigned_to");
+                String activityAssignUser=jsonObject.getString("assigned_to_user");
+                String activityCreator = jsonObject.getString("activity_creator");
                 Activity activity=new Activity();
                 activity.activityId=activityId;
                 activity.activityDescription=activityDescrption;
@@ -278,7 +283,10 @@ public class WebSocketClient extends WebSocketListener {
                 activity.scheduleId=scheduleId;
                 activity.activityName=activityName;
                 activity.issued_date=issued_date;
-                Log.d(TAG, "onMessage: functioning activity received "+activityName);
+                activity.assigned_to=activityAssignedId;
+                activity.assigned_to_user=activityAssignUser;
+                activity.activityCreator=activityCreator;
+                Log.d(TAG, "onMessage: functioning activity received "+activityName+" "+activityAssignedId);
                 foregroundService.setExistingActivity(activity,false);
                 Log.d(TAG, "onMessage: updating ");
             } catch (JSONException e) {
@@ -308,6 +316,8 @@ public class WebSocketClient extends WebSocketListener {
                 String activityName = messageObject.getString("activity_name");
                 String activityIssuedDate = messageObject.getString("activity_issued_date");
                 String activityChange = messageObject.getString("change");
+                int activityAssignedId = messageObject.getInt("assigned_to_id");
+                String activityCreator = messageObject.getString("activity_creator");
                 Activity activity=new Activity();
                 activity.activityName=activityName;
                 activity.activityDescription=activityDescription;
@@ -316,6 +326,8 @@ public class WebSocketClient extends WebSocketListener {
                 activity.machineId=activityMachineId;
                 activity.scheduleId=activityScheduleId;
                 activity.issued_date=activityIssuedDate;
+                activity.assigned_to=activityAssignedId;
+                activity.activityCreator=activityCreator;
                 if( activityChange.equals("create")){
                     foregroundService.setExistingActivity(activity,false);
                 }
@@ -341,6 +353,7 @@ public class WebSocketClient extends WebSocketListener {
                 int activityScheduleId = messageObject.getInt("activity_schedule_id");
                 String activityName = messageObject.getString("activity_name");
                 String activityIssuedDate = messageObject.getString("activity_issued_date");
+                String activityCreator = messageObject.getString("activity_creator");
                 String activityChange = messageObject.getString("change");
                 Activity activity=new Activity();
                 activity.activityId=activityId;
@@ -351,6 +364,7 @@ public class WebSocketClient extends WebSocketListener {
                 activity.machineId=activityMachineId;
                 activity.scheduleId=activityScheduleId;
                 activity.issued_date=activityIssuedDate;
+                activity.activityCreator=activityCreator;
                 Log.d(TAG, "onMessage: activity change "+activityChange);
                 if( activityChange.equals("updated")){
                     foregroundService.setExistingActivity(activity,true);
@@ -387,18 +401,6 @@ public class WebSocketClient extends WebSocketListener {
                 e.printStackTrace();
             }
 
-        } else if (text.contains("callback")) {
-            try {
-                JSONObject jsonObject=new JSONObject(text);
-                String callback=jsonObject.getString("callback");
-                if(callback.equals("create")){
-                    Log.d(TAG, "onMessage: callback is "+callback);
-                    foregroundService.updateUi();
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
         } else if (text.contains("username")&&text.contains("userid")) {
             try {
                 JSONObject jsonObject=new JSONObject(text);
@@ -412,6 +414,22 @@ public class WebSocketClient extends WebSocketListener {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }else if (text.contains("callback")&& text.contains("model")) {
+            try {
+                JSONObject jsonObject=new JSONObject(text);
+                String callback=jsonObject.getString("callback");
+                String model=jsonObject.getString("model");
+                Log.d(TAG, "onMessage: callback and model "+callback+" "+model);
+                if(callback.equals("created")){
+                    Log.d(TAG, "onMessage: callback is "+callback);
+                    foregroundService.updateUi(callback,model);
+                } else if (callback.equals("update")) {
+                    foregroundService.updateUi(callback,model);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
     public void getUsers(CharSequence sequence){

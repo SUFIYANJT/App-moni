@@ -43,10 +43,10 @@ public class InspectorReview extends Fragment  implements SearchableFragment{
         fab.setVisibility(View.GONE);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewins);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        customAdapter = new CustomAdapter(activities, false, true);
+        customAdapter = new CustomAdapter(activities, false, true,false);
         recyclerView.setAdapter(customAdapter);
 
-        customAdapter.setOnItemClickListener(item -> {
+        customAdapter.setOnItemClickListener((item,position) -> {
             Intent intent = new Intent(requireContext(), NewWindow.class);
             startActivity(intent);
         });

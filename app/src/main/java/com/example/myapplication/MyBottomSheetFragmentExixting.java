@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 
@@ -23,6 +22,7 @@ import com.example.myapplication.model.MachineAdapter;
 import com.example.myapplication.model.UserAdapter;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
@@ -40,10 +40,11 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
     MachineAdapter machine;
     MachineAdapter component;
     MachineAdapter schedule;
+    Activity activity1=new Activity();
     private ArrayList<Machine> machines = new ArrayList<>();
     private  ArrayList<Machine> components = new ArrayList<>();
     private ArrayList<Machine> schedules = new ArrayList<>();
-    ItemModel itemModel;
+    ItemModel itemModel,itemModel2;
     AutoCompleteTextView autoCompleteTextView;
     AutoCompleteTextView autoCompleteTextView1;
     AutoCompleteTextView autoCompleteTextView2;
@@ -52,9 +53,15 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
     ArrayList<User> userArrayList=new ArrayList<>();
     MyBottomSheetFragmentExixting bottomSheetFragmentExixting;
     private String lastkey="null";
-    public MyBottomSheetFragmentExixting(Activity activity) {
+    ArrayList<Activity> activities;
+    int i=0;
+    int position;
+    public MyBottomSheetFragmentExixting(Activity activity, ArrayList<Activity> activities, int position) {
         // Required empty public constructor
         this.activity=activity;
+        this.position=position;
+        this.activities=activities;
+        Log.d(TAG, "MyBottomSheetFragmentExixting: activity id "+activity.activityId);
     }
 
     @Override
@@ -90,6 +97,8 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
         userAdapter = new UserAdapter(requireContext(), userArrayList);
         autoCompleteTextView3.setAdapter(userAdapter);
         autoCompleteTextView3.setThreshold(1);
+        autoCompleteTextView3.setText(activity.assigned_to_user);
+        itemModel=null;
         itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
         itemModel.getUserMutableLiveData().observe(getViewLifecycleOwner(), users -> {
             if (users != null && !users.isEmpty()) {
@@ -102,9 +111,32 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
                 Log.d(TAG, "onChanged: Users list is empty or null");
             }
         });
-        autoCompleteTextView3.setOnItemClickListener((parent, view1, position, id) -> {
-            user_id=userAdapter.getItem(position).getUser_id();
+        MyForegroundService.foregroundService.setUi(this.requireActivity());
+        itemModel.getCallBack().observe(getViewLifecycleOwner(), data -> {
+            Log.d(TAG, "onCreateView: updating the string from background ");
+            if (data.equals("update")&&i!=0) {
+                Snackbar snackbar=Snackbar.make(requireView(), "Activity changed its properties", Snackbar.LENGTH_SHORT);
+                snackbar.setTextColor(getResources().getColor(R.color.darkGreen));
+                snackbar.setBackgroundTint(getResources().getColor(R.color.black));
+                snackbar.addCallback(new Snackbar.Callback(){
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        super.onDismissed(transientBottomBar, event);
+                        dismiss();
+                    }
+                });
+                snackbar.show();
+            }i++;
+
         });
+
+        autoCompleteTextView3.setOnItemClickListener((parent, view1, position, id) -> {
+            user_id= Objects.requireNonNull(userAdapter.getItem(position)).getUser_id();
+            activity1.assigned_to= Objects.requireNonNull(userAdapter.getItem(position)).getUser_id();
+            activity1.assigned_to_user= Objects.requireNonNull(userAdapter.getItem(position)).getUsername();
+            Log.d(TAG, "onCreateView: user_id updated "+user_id);
+        });
+
         autoCompleteTextView3.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -121,23 +153,27 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
             }
         });
         button1.setOnClickListener(v -> {
-            Activity activity=new Activity();
-            activity.activityName=textInputLayout1.getEditText().getText().toString();
-            activity.activityDescription=textInputLayout3.getEditText().getText().toString();
-            activity.activity_satuts_id=1;
+            i++;
+            itemModel.setIntegerMutableLiveData(position);
+
+            Log.d(TAG, "onCreateView: final checking size "+activities.size()+" "+itemModel.getActivityMutableLiveData().getValue().size());
+
+            activity1.activityName=textInputLayout1.getEditText().getText().toString();
+            activity1.activityDescription=textInputLayout3.getEditText().getText().toString();
+            activity1.activity_satuts_id=1;
             int lengthm=autoCompleteTextView.getText().toString().length();
             int lengthc=autoCompleteTextView1.getText().toString().length();
             int lengths=autoCompleteTextView2.getText().toString().length();
             int lengthu=autoCompleteTextView3.getText().toString().length();
-            activity.machineId= Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm-1)));
-            activity.componentId= Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc-1)));
-            activity.scheduleId= Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths-1)));
+            activity1.machineId= Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm-1)));
+            activity1.componentId= Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc-1)));
+            activity1.scheduleId= Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths-1)));
             Log.d(TAG, "confirmInput: ");
-            activity.assigned_to=user_id;
-            activity.activityId=Integer.parseInt(String.valueOf(autoCompleteTextView3.getText().toString().charAt(lengthu-1)));
+            activity1.activityId=this.activity.activityId;
             Date date=new Date();
-            activity.issued_date= String.valueOf(date.getTime());
-            MyForegroundService.foregroundService.setChangeActivity(activity);
+            activity1.issued_date= String.valueOf(date.getTime());
+            Log.d(TAG, "onCreateView: activity assigned to "+activity1.assigned_to+" "+activity1.activityId);
+            MyForegroundService.foregroundService.setChangeActivity(activity1);
         });
 
         return view;
@@ -147,5 +183,11 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
         this.userArrayList.addAll(userArrayList);
         userAdapter.notifyDataSetChanged();
         Log.d(TAG, "setUserArrayList: ");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: destroying bottomFragment");
     }
 }

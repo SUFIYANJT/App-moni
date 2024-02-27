@@ -1,11 +1,8 @@
 package com.example.myapplication;
 
-import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
-
 import static com.example.myapplication.service.MyForegroundService.no_of_running_service;
 
 import android.Manifest;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,14 +18,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
@@ -38,19 +33,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.myapplication.Support.Activity;
-import com.example.myapplication.Support.User;
-import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
-import com.example.myapplication.model.MyBroadcastReceiver;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -74,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "onServiceConnected: connect callback working ");
             this.name = name;
             this.service = service;
             MyForegroundService.MyBinder binder = (MyForegroundService.MyBinder) service;
@@ -95,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
             if (activity != null) {
                 Log.d(TAG, "onReceive: Received activity: " + activity.activityName);
             }
+            Log.d(TAG, "onReceive: activity is "+activity.activity_satuts_id);
             if (activity.activity_satuts_id == 1) {
                 if (change != null && change.equals("create")) {
                     ExistingActivities.add(activity);
@@ -122,17 +113,22 @@ public class MainActivity extends AppCompatActivity {
             } else if (activity.activity_satuts_id == 2) {
                 if (change != null && change.equals("create")) {
                     IssuedActivities.add(activity);
-                    Log.d(TAG, "onReceive: Added new activity: " + activity.activityName);
+                    Log.d(TAG, "onReceive: Added new activity for issued : " + activity.activityName);
                 } else if (change != null && change.equals("update")) {
                     int i = 0;
+                    boolean flag=true;
                     for (Activity act : IssuedActivities) {
                         Log.d(TAG, "onReceive: activity id checking " + act.activityId + " " + activity.activityId);
-                        if (activity != null && act.activityId == activity.activityId) {
+                        if (act.activityId == activity.activityId) {
                             IssuedActivities.set(i, activity);
                             Log.d(TAG, "onReceive: Updated activity: " + activity.activityName);
+                            flag=false;
                             break;
                         }
                         i++;
+                    }
+                    if(flag){
+                        IssuedActivities.add(activity);
                     }
                     Log.d(TAG, "onReceive: ExistingActivities size: " + IssuedActivities.size() + ", i: " + i);
                 }
@@ -249,8 +245,8 @@ public class MainActivity extends AppCompatActivity {
             bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             Log.d(TAG, "onCreate: starting the service because no service found ");
         } else {
-            Log.d(TAG, "onCreate: service is running call for data from server");
-            MyForegroundService.foregroundService.getExistingActivity();
+
+                MyForegroundService.foregroundService.getExistingActivity();
         }
     }
     @Override
@@ -337,7 +333,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+    }
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override

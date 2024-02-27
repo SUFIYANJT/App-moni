@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import static com.example.myapplication.LoginActivity.TAG;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.textview.MaterialTextView;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     private OnItemClickListener listener;
     private boolean isPendingActivity;
     private boolean isInspecterReview;
+    private boolean isIssuedActivity;
 
     public void setFilteredList(List<Activity> filteredList) {
 
@@ -32,10 +35,11 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         notifyDataSetChanged();
 
     }
-    public CustomAdapter(List<Activity> itemList, boolean isPendingActivity, boolean isInspecterReview) {
+    public CustomAdapter(List<Activity> itemList, boolean isPendingActivity, boolean isInspecterReview,boolean isIssuedActivity) {
         this.itemList = itemList;
         this.isPendingActivity = isPendingActivity;
         this.isInspecterReview = isInspecterReview;
+        this.isIssuedActivity=isIssuedActivity;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -43,7 +47,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Activity item);
+        void onItemClick(Activity item,int position);
     }
 
     @NonNull
@@ -53,15 +57,20 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         return new ViewHolder(itemView);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Activity item = itemList.get(position);
         holder.textView.setText(item.activityName);
         holder.itemView.setOnClickListener(view -> {
             if (listener != null) {
-                listener.onItemClick(item);
+                listener.onItemClick(item,position);
             }
         });
+        holder.linearProgressIndicator.setVisibility(View.GONE);
+        holder.materialTextView.setText(item.activityDescription);
+        holder.textViewAssignedTo.setText("Assigned to "+itemList.get(position).assigned_to_user);
+        holder.textViewAssignedBy.setText("Assigned by "+itemList.get(position).activityCreator);
         if (isInspecterReview) {
             // For inspector review, show only the image view
             holder.imageView.setVisibility(View.VISIBLE);
@@ -93,6 +102,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         CardView cardView;
         LinearProgressIndicator linearProgressIndicator;
         ImageView imageView;
+        MaterialTextView materialTextView,textViewAssignedTo,textViewAssignedBy;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -100,6 +110,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             textView = itemView.findViewById(R.id.textView);
             linearProgressIndicator = itemView.findViewById(R.id.linear_progress_indicator);
             imageView = itemView.findViewById(R.id.imageView);
+            materialTextView=itemView.findViewById(R.id.materialDescription);
+            textViewAssignedTo=itemView.findViewById(R.id.text_assign_to);
+            textViewAssignedBy=itemView.findViewById(R.id.text_assign_by);
         }
 
     }

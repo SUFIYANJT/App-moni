@@ -54,14 +54,20 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     MachineAdapter machine;
     MachineAdapter component;
     MachineAdapter schedule;
+    BottomSheetFragment bottomSheetFragment;
     BroadcastReceiver broadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
             String type=intent.getStringExtra("type");
+            String modal=intent.getStringExtra("modal");
+            String change=intent.getStringExtra("change");
             if(type.equals("ui")){
-
-                Snackbar.make(view,"Activity Created",Snackbar.LENGTH_SHORT).show();
+                bottomSheetFragment.dismiss();
+                if(change.equals("update"))
+                    Snackbar.make(view,"Activity Changed its properties",Snackbar.LENGTH_SHORT).show();
+                else if (change.equals("create"))
+                    Snackbar.make(view,"Activity created",Snackbar.LENGTH_SHORT).show();
             }else {
 
                 Machine data = (Machine) intent.getSerializableExtra("data");
@@ -98,6 +104,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         machine = new MachineAdapter(requireContext(),machines);
         component = new MachineAdapter(requireContext(),components);
         schedule = new MachineAdapter(requireContext(),schedules);
+        bottomSheetFragment=this;
         IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
         LocalBroadcastManager.getInstance(requireContext().getApplicationContext()).registerReceiver(broadcastReceiver, filter);
         autoCompleteTextView.setAdapter(machine);
@@ -143,7 +150,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         Date date=new Date();
         activity.issued_date= String.valueOf(date.getTime());
         MyForegroundService.foregroundService.CreateActivity(activity);
-        this.dismiss();
     }
 
     @Override

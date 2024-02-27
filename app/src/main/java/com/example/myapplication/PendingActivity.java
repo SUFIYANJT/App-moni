@@ -50,7 +50,7 @@ public class PendingActivity extends Fragment  implements SearchableFragment{
         fab.setVisibility(View.VISIBLE);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewPen);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        customAdapter = new CustomAdapter(activities, true, false);
+        customAdapter = new CustomAdapter(activities, true, false,false);
         recyclerView.setAdapter(customAdapter);
         setHasOptionsMenu(true);
 

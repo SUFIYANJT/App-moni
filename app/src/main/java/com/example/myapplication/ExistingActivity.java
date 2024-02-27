@@ -40,22 +40,34 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
         itemModel.getActivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
-            activities.clear();
-            activities.addAll(newData);
-            Log.d(TAG, "onCreateView: "+newData.size());
-            adapter.notifyDataSetChanged();
+            if (newData != null) {
+                // Clear the current list
+                activities.clear();
+                // Add all items from the new list
+                activities.addAll(newData);
+                // Notify the adapter that the data set has changed
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "onCreateView: existing activity data" + newData.size());
+            }else{
+                Log.d(TAG, "onCreateView: new data is null ");
+            }
+        });
+        itemModel.getIntegerMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
+            Log.d(TAG, "onCreateView: getting the data "+newData);
+           activities.remove(activities.get(newData));
+           adapter.notifyItemRemoved(newData);
+            Log.d(TAG, "onCreateView: activity size "+activities.size());
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        View emptyView =null;
-        adapter = new CustomAdapter(activities, false, false);
+        Log.d(TAG, "onCreateView: arraylist is "+activities.size());
+        adapter = new CustomAdapter(activities, false, false,false);
         recyclerView.setAdapter(adapter);
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
-        adapter.setOnItemClickListener(item -> {
-            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item);
+        adapter.setOnItemClickListener((item, position) -> {
+            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position);
             bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
         });
-
         return view;
     }
 

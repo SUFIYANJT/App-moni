@@ -9,14 +9,12 @@
     android:layout_margin="2dp"
     app:cardCornerRadius="10dp"
     app:cardElevation="4dp">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         style="@style/CardViewStyle"
-        android:padding="26dp">
-
+        android:padding="5dp">
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="56dp"
@@ -24,19 +22,61 @@
             android:scaleType="centerCrop"
             android:src="@drawable/baseline_playlist_add_24"
             android:background="@drawable/circular_background" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="16sp"
-            style="@style/CardViewStyle"
-            android:paddingStart="0dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="0dp"
-            android:paddingBottom="8dp"/>
-
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+          >
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              >
+              <TextView
+                  android:id="@+id/textView"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_weight="1"
+                  android:textSize="15sp"
+                  android:fontFamily="@font/gr"
+                  style="@style/CardViewStyle"
+                  android:paddingStart="0dp"
+                  android:paddingEnd="16dp"
+                  android:paddingTop="0dp"
+                  android:paddingBottom="8dp"/>
+              <com.google.android.material.textfield.TextInputLayout
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content">
+                  <com.google.android.material.textview.MaterialTextView
+                      android:layout_width="wrap_content"
+                      android:id="@+id/materialDescription"
+                      android:textSize="12sp"
+                      android:fontFamily="@font/gr"
+                      android:layout_height="match_parent"/>
+              </com.google.android.material.textfield.TextInputLayout>
+          </LinearLayout>
+          <LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:layout_gravity="end"
+              >
+              <com.google.android.material.textview.MaterialTextView
+                  android:layout_width="wrap_content"
+                  android:id="@+id/text_assign_to"
+                  android:fontFamily="@font/gr"
+                  android:layout_gravity="end"
+                  android:textSize="10sp"
+                  android:layout_height="wrap_content"/>
+              <com.google.android.material.textview.MaterialTextView
+                  android:layout_width="wrap_content"
+                  android:fontFamily="@font/gr"
+                  android:layout_gravity="end"
+                  android:textSize="10sp"
+                  android:id="@+id/text_assign_by"
+                  android:layout_height="wrap_content"/>
+          </LinearLayout>
+      </LinearLayout>
     </LinearLayout>
 
 
@@ -52,5 +92,6 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:paddingBottom="9dp" />
+
 </com.google.android.material.card.MaterialCardView>
 

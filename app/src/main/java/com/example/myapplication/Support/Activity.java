@@ -13,4 +13,6 @@ public class Activity implements Serializable {
     public int scheduleId;
     public String activityName;
     public String issued_date;
+    public String assigned_to_user;
+    public String activityCreator;
 }

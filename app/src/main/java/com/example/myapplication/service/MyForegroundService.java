@@ -39,6 +39,7 @@ import com.example.myapplication.Support.User;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MyBroadcastReceiver;
 import com.example.myapplication.network.WebSocketClient;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.io.Serializable;
@@ -151,7 +152,6 @@ public class MyForegroundService extends Service implements NetworkConnector {
         Intent intent = new Intent("com.example.ACTION_SEND_DATA");
         intent.putExtra("key", (Serializable) user);
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-
     }
 
     private void createNotification() {
@@ -192,12 +192,19 @@ public class MyForegroundService extends Service implements NetworkConnector {
     public void CreateActivity(Activity activity) {
         webSocketClient.CreateActivity(activity);
     }
+    public void setUi(FragmentActivity activity){
+        this.activity=activity;
+    }
 
-    public void updateUi() {
+    public void updateUi(String callback,String model) {
         Intent intent = new Intent("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
         intent.putExtra("data", (Serializable) null);
         intent.putExtra("type", "ui");
         intent.putExtra("change", "update");
+        intent.putExtra("modal",model);
+        Log.d(TAG, "updateUi: reached in back ground to update ui ");
+        itemModel=new ViewModelProvider(activity).get(ItemModel.class);
+        itemModel.setCallBack("update");
     }
 
     public void getUsers(CharSequence sequence, FragmentActivity activity) {

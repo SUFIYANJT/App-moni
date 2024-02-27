@@ -47,6 +47,7 @@
 
         <activity
             android:name=".LoginActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,6 +57,7 @@
 
         <activity android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize"
             android:launchMode="singleTop"
             >
             <intent-filter>
@@ -68,8 +70,12 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".NewWindow" />
-        <activity android:name=".newmainuser" />
+        <activity android:name=".NewWindow"
+            android:configChanges="orientation|screenSize|smallestScreenSize"
+            />
+        <activity android:name=".newmainuser"
+            android:configChanges="orientation|screenSize|smallestScreenSize"
+            />
 
         <!-- Correct declaration for UsercardWindow activity -->
         <activity android:name=".UsercardWindow" />

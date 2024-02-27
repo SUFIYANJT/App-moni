@@ -28,7 +28,7 @@ public class newmainuser extends AppCompatActivity implements View.OnClickListen
         List<Activity> itemList = new ArrayList<>();
         RecyclerView recyclerView = findViewById(R.id.recyclerViewuser);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        CustomAdapter customAdapter = new CustomAdapter(itemList, false, false);
+        CustomAdapter customAdapter = new CustomAdapter(itemList, false, false,false);
         recyclerView.setAdapter(customAdapter);
         findViewById(R.id.menu_button).setOnClickListener(v -> showMenu(v));
         findViewById(R.id.cardViewUSER).setOnClickListener(this);

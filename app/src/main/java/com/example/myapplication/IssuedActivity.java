@@ -34,7 +34,7 @@ public class IssuedActivity extends Fragment  implements SearchableFragment {
         itemModel.getIssuedactivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
             activities.clear();
             activities.addAll(newData);
-            Log.d(TAG, "onCreateView: "+newData.size());
+            Log.d(TAG, "onCreateView: issued activity "+newData.size());
             customAdapter.notifyDataSetChanged();
         });
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
@@ -45,12 +45,12 @@ public class IssuedActivity extends Fragment  implements SearchableFragment {
 
         // Pass true for isInspecterReview and false for isPendingActivity
 
-        customAdapter = new CustomAdapter(activities, false, false);
+        customAdapter = new CustomAdapter(activities, false, false,true);
 
         recyclerView.setAdapter(customAdapter);
 
         // Set item click listener
-        customAdapter.setOnItemClickListener(item -> {
+        customAdapter.setOnItemClickListener((item,position) -> {
             // Show popup window
             BottomSheetDialogFragmentIssued bottomSheetFragment = new BottomSheetDialogFragmentIssued();
             bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
