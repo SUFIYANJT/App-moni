@@ -40,15 +40,22 @@ public class InspectorReview extends Fragment  implements SearchableFragment{
             Log.d(TAG, "onCreateView: getting the size "+customAdapter.getItemCount()+" "+activities.size());
         });
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
-        fab.setVisibility(View.GONE);
+       // fab.setVisibility(View.GONE);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewins);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         customAdapter = new CustomAdapter(activities, false, true,false);
         recyclerView.setAdapter(customAdapter);
+        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Activity item, int position) {
+                Intent intent = new Intent(requireContext(), NewWindow.class);
+                startActivity(intent);
+            }
 
-        customAdapter.setOnItemClickListener((item,position) -> {
-            Intent intent = new Intent(requireContext(), NewWindow.class);
-            startActivity(intent);
+            @Override
+            public void onItemClick(Activity item, int position, String message) {
+
+            }
         });
 
         return view;

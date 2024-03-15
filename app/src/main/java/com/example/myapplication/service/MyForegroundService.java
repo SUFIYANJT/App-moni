@@ -35,7 +35,10 @@ import com.example.myapplication.NetworkConnector;
 import com.example.myapplication.R;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.Machine;
+import com.example.myapplication.Support.SubmitHolder;
+import com.example.myapplication.Support.Task;
 import com.example.myapplication.Support.User;
+import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MyBroadcastReceiver;
 import com.example.myapplication.network.WebSocketClient;
@@ -76,6 +79,9 @@ public class MyForegroundService extends Service implements NetworkConnector {
         webSocketClient = new WebSocketClient(this, this);
         createNotification();
         // getExistingActivity();
+        User user1=UserPreferences.getUser(getApplicationContext());
+        if(user1!=null&&user1.getUsermode().equals("B"))
+            getTask();
         return START_STICKY;
     }
 
@@ -84,27 +90,20 @@ public class MyForegroundService extends Service implements NetworkConnector {
         Log.d(TAG, "getExistingActivity: fore ground called form the main activity ");
     }
 
-    public void setExistingActivity(Activity activity, boolean isUpdate) {
+    public void setExistingActivity(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Log.d(TAG, "setExistingActivity: activity obtained " + activity.activityName);
             Intent intent = new Intent(this, MyBroadcastReceiver.class); // Replace MyBroadcastReceiver with your actual receiver class
             intent.setAction("com.example.ACTION_SEND_DATA");
             intent.putExtra("activity", (Serializable) activity);
-            if (!isUpdate) {
-                intent.putExtra("change", "create");
-            } else {
-                intent.putExtra("change", "update");
-            }
+            Log.d(TAG, "setExistingActivity: activity change check "+activity.change+" "+activity.uiChange);
             LocalBroadcastManager.getInstance(this.getApplicationContext()).sendBroadcast(intent);
         } else {
             Log.d(TAG, "setExistingActivity: activity obtained " + activity.activityName);
             Intent intent = new Intent("com.example.ACTION_SEND_DATA");
+            intent.putExtra("calledby","setExistingActivity");
             intent.putExtra("activity", (Serializable) activity);
-            if (!isUpdate) {
-                intent.putExtra("change", "create");
-            } else {
-                intent.putExtra("change", "update");
-            }
+            Log.d(TAG, "setExistingActivity: activity change check "+activity.change+" "+activity.uiChange);
             sendBroadcast(intent);
         }
     }
@@ -202,7 +201,7 @@ public class MyForegroundService extends Service implements NetworkConnector {
         intent.putExtra("type", "ui");
         intent.putExtra("change", "update");
         intent.putExtra("modal",model);
-        Log.d(TAG, "updateUi: reached in back ground to update ui ");
+        Log.d(TAG, "updateUi: reached in back ground to update ui "+activity);
         itemModel=new ViewModelProvider(activity).get(ItemModel.class);
         itemModel.setCallBack("update");
     }
@@ -231,7 +230,12 @@ public class MyForegroundService extends Service implements NetworkConnector {
     }
 
     public void setChangeActivity(Activity activity) {
-        webSocketClient.updateActivity(activity);
+        Log.d(TAG, "setChangeActivity: called ");
+        if(activity.change!=null&&activity.change.equals("delete")){
+            webSocketClient.deleteActivity(activity);
+        }else {
+            webSocketClient.updateActivity(activity);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -289,6 +293,22 @@ public class MyForegroundService extends Service implements NetworkConnector {
     public Gson message() {
         return null;
     }
+
+    public void getTask() {
+        webSocketClient.getTask();
+    }
+
+    public void setTask(Task task) {
+        Intent intent = new Intent("com.example.ACTION_SEND_TASK_DATA");
+        intent.putExtra("task",(Serializable) task);
+        Log.d(TAG, "setTask: task is has been reached and to update ");
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+    }
+
+    public void sendReport(ArrayList<SubmitHolder> submitHolders) {
+        webSocketClient.sendReport(submitHolders);
+    }
+
     public class MyBinder extends Binder {
         public MyForegroundService getService() {
             return MyForegroundService.this;

@@ -154,10 +154,7 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
         });
         button1.setOnClickListener(v -> {
             i++;
-            itemModel.setIntegerMutableLiveData(position);
-
             Log.d(TAG, "onCreateView: final checking size "+activities.size()+" "+itemModel.getActivityMutableLiveData().getValue().size());
-
             activity1.activityName=textInputLayout1.getEditText().getText().toString();
             activity1.activityDescription=textInputLayout3.getEditText().getText().toString();
             activity1.activity_satuts_id=1;
@@ -168,14 +165,19 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
             activity1.machineId= Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm-1)));
             activity1.componentId= Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc-1)));
             activity1.scheduleId= Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths-1)));
-            Log.d(TAG, "confirmInput: ");
+            Log.d(TAG, "confirmInput: "+position);
             activity1.activityId=this.activity.activityId;
             Date date=new Date();
             activity1.issued_date= String.valueOf(date.getTime());
-            Log.d(TAG, "onCreateView: activity assigned to "+activity1.assigned_to+" "+activity1.activityId);
-            MyForegroundService.foregroundService.setChangeActivity(activity1);
+            if(activity.assigned_to_user.equals("None")&&activity.assigned_to==0) {
+                itemModel.setIntegerMutableLiveData(position);
+                Log.d(TAG, "onCreateView: activity assigned to " + activity1.activityName + " " + activity1.activityId);
+                activity.change="update";
+                MyForegroundService.foregroundService.setChangeActivity(activity1);
+            }else{
+                Log.d(TAG, "onCreateView: activity name " + activity.activityName+" "+activity.assigned_to_user);
+            }
         });
-
         return view;
     }
     public void setUserArrayList(ArrayList<User> userArrayList){
@@ -184,7 +186,6 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
         userAdapter.notifyDataSetChanged();
         Log.d(TAG, "setUserArrayList: ");
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();

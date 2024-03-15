@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity {
             }
             UserPreferences.saveUser(getApplicationContext(),user);
             finish();
-
+            Log.d(TAG, "onReceive: user is gotten "+user.getUsermode());
             if ("A".equals(user.getUsermode())) {
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
             } else if ("B".equals(user.getUsermode())) {

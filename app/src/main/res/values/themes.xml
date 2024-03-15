@@ -18,6 +18,12 @@
         <item name="android:textColor">@color/darkBackground</item>
         <item name="android:backgroundTint">@color/id</item>
     </style>
+    <style name="ActivityUser">
+        <item name="background">@color/id</item>
+        <item name="iconTint">@color/darkBackground</item>
+        <item name="android:textColor">@color/darkBackground</item>
+        <item name="android:backgroundTint">@color/id</item>
+    </style>
     <style name="Cantainer" >
         <item name="android:background">@color/id</item>
         <item name="android:textColor">@color/lightDark</item>

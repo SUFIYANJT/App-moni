@@ -15,4 +15,6 @@ public class Activity implements Serializable {
     public String issued_date;
     public String assigned_to_user;
     public String activityCreator;
+    public String change;
+    public String uiChange;
 }

@@ -10,6 +10,9 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -24,7 +27,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.Support.SubmitHolder;
+import com.example.myapplication.Support.Task;
+import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
+import com.example.myapplication.service.MyForegroundService;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -45,6 +52,7 @@ public class UsercardWindow extends AppCompatActivity  {
     ArrayList<SubmitHolder> submitHolders=new ArrayList<>();
     RecyclerView recyclerView;
     RecyclerReport recyclerReport;
+    Task task;
 
 
     // Declare this instance variable
@@ -68,10 +76,21 @@ public class UsercardWindow extends AppCompatActivity  {
             }
     );
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.usercardwindow);
+        Intent intent1=getIntent();
+        task = (Task) intent1.getSerializableExtra("task");
+        MaterialToolbar materialToolbar=findViewById(R.id.toolbaruserwindow);
+        if (task != null) {
+            Log.d(TAG, "onCreate: task is "+task.getActivityName());
+            materialToolbar.setTitle(task.getActivityName());
+        }
+        setSupportActionBar(materialToolbar);
+        invalidateOptionsMenu();
         messageInputEditText = findViewById(R.id.messageInputEditText);
         MaterialButton sendButton = findViewById(R.id.sendButton);
         recyclerReport=new RecyclerReport(this,submitHolders,new UsercardWindow());
@@ -80,36 +99,15 @@ public class UsercardWindow extends AppCompatActivity  {
         recyclerView.setAdapter(recyclerReport);
         MaterialButton voiceMessageButton = findViewById(R.id.voiceMessageButton);
         MaterialButton attachmentButton = findViewById(R.id.attachmentButton);
-        MaterialButton backButton = findViewById(R.id.back_buttonuserwindow);
         seekBar=findViewById(R.id.progress_linear_bar);
-
-        // Set click listener for the back button
-        backButton.setOnClickListener(v -> {
-            Intent intent = new Intent(UsercardWindow.this, newmainuser.class);
-            startActivity(intent);
-            finish();
+        seekBar.setOnClickListener(v->{
+            MyForegroundService.foregroundService.sendReport(submitHolders);
         });
-
-
-        // Set click listeners for the other buttons
         sendButton.setOnClickListener(v -> sendMessage());
-
         voiceMessageButton.setOnClickListener(v -> recordVoiceMessage());
-
         attachmentButton.setOnClickListener(v -> attachFile());
-        // Set click listener for the attached image view
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        ItemModel itemModel=new ItemModel();
-        Log.d(TAG, "onResume: resumed activity ");
-        if(itemModel.getArrayListMutableLiveData()!=null){
-            submitHolders=itemModel.getArrayListMutableLiveData();
-            Log.d(TAG, "onCreate: submitHolders "+submitHolders.size());
-        }
-    }
 
     public void sendMessage() {
         String message = Objects.requireNonNull(messageInputEditText.getText()).toString().trim();
@@ -122,6 +120,39 @@ public class UsercardWindow extends AppCompatActivity  {
             submitHolders.add(submitHolder);
             messageInputEditText.setText("");
 
+        }
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.d(TAG, "onCreateOptionsMenu: inflator is working");
+        // Inflate menu with items using MenuInflator
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_back, menu);
+        MenuItem menuItem = menu.findItem(R.id.back_button);
+        return super.onCreateOptionsMenu(menu);
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Log.d(TAG, "onOptionsItemSelected: id is "+item.getItemId());
+        // Handle item selection
+        if (id == R.id.back_button) {
+            // Handle Item 1 selection
+            finish();
+            return true;
+        } else if (id == R.id.menu_settings) {
+            // Handle Item 2 selection
+            Toast.makeText(this, "setting clicked ", Toast.LENGTH_SHORT).show();
+            return true;
+        } else if (id == R.id.menu_mark_complete) {
+            UserPreferences.saveUser(this.getApplicationContext(),null);
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            // Handle Item 3 selection
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 

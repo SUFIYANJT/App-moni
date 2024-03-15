@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -41,11 +42,8 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         itemModel = new ViewModelProvider(requireActivity()).get(ItemModel.class);
         itemModel.getActivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
             if (newData != null) {
-                // Clear the current list
                 activities.clear();
-                // Add all items from the new list
                 activities.addAll(newData);
-                // Notify the adapter that the data set has changed
                 adapter.notifyDataSetChanged();
                 Log.d(TAG, "onCreateView: existing activity data" + newData.size());
             }else{
@@ -54,8 +52,9 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         });
         itemModel.getIntegerMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
             Log.d(TAG, "onCreateView: getting the data "+newData);
-           activities.remove(activities.get(newData));
-           adapter.notifyItemRemoved(newData);
+            activities.remove(activities.get(newData));
+            adapter.notifyItemRemoved(newData);
+            Toast.makeText(this.requireActivity(), "activity changed ", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "onCreateView: activity size "+activities.size());
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -64,13 +63,17 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         recyclerView.setAdapter(adapter);
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
-        adapter.setOnItemClickListener((item, position) -> {
-            MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position);
-            bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
+        adapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Activity item, int position) {
+                MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position);
+                bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
+            }
+            @Override
+            public void onItemClick(Activity item, int position, String message) {}
         });
         return view;
     }
-
     @Override
     public void updateSearchQuery(String query) {
         List<Activity> filteredList = new ArrayList<>();
@@ -80,7 +83,6 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
             }
         }
         adapter.setFilteredList(filteredList);
-
     }
 
 }

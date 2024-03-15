@@ -78,7 +78,8 @@
             />
 
         <!-- Correct declaration for UsercardWindow activity -->
-        <activity android:name=".UsercardWindow" />
+        <activity android:name=".UsercardWindow"
+            android:configChanges="orientation|screenSize|smallestScreenSize"/>
         <receiver android:name=".model.MyBroadcastReceiver"
             android:exported="true"
             tools:ignore="Instantiatable">

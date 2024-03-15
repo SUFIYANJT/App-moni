@@ -7,26 +7,16 @@
     android:padding="0dp">
 
     <com.google.android.material.appbar.MaterialToolbar
+        style="@style/ActivityUser"
         android:id="@+id/toolbaruserwindow"
+        app:menu="@menu/menu_back"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        style="@style/ActivityMain"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-       >
+        />
 
-        <!-- Back Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/back_buttonuserwindow"
-            android:layout_width="35dp"
-            android:layout_height="match_parent"
-            style="@style/ActivityMain"
-            app:icon="@drawable/baseline_arrow_back"
-            app:iconGravity="textStart"
-            app:iconSize="25dp"
-            />
-    </com.google.android.material.appbar.MaterialToolbar>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:id="@+id/chatRecycler"

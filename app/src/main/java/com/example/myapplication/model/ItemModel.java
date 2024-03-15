@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.SubmitHolder;
+import com.example.myapplication.Support.Task;
 import com.example.myapplication.Support.User;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import java.util.List;
 public class ItemModel extends ViewModel {
     private String name;
     public MutableLiveData<ArrayList<User>> userMutableLiveData=new MutableLiveData<>();
+    private MutableLiveData<Task> taskData = new MutableLiveData<>();
+    public MutableLiveData<Integer> integerMutableLiveData2=new MutableLiveData<>();
     private MutableLiveData<Long> liveDataExample = new MutableLiveData<>();
     private MutableLiveData<Integer> integerMutableLiveData = new MutableLiveData<>();
     private MutableLiveData<ArrayList<Machine>> MachineMutableLiveData=new MutableLiveData<>();
@@ -142,5 +145,19 @@ public class ItemModel extends ViewModel {
 
     public void setIntegerMutableLiveData(Integer integerMutableLiveData) {
         this.integerMutableLiveData.setValue(integerMutableLiveData);
+    }
+    public void setIntegerMutableLiveData2(Integer integerMutableLiveData2){
+        this.integerMutableLiveData2.setValue(integerMutableLiveData2);
+    }
+    public MutableLiveData<Integer> getIntegerMutableLiveData2(){
+        return integerMutableLiveData2;
+    }
+
+    public MutableLiveData<Task> getTaskData() {
+        return taskData;
+    }
+
+    public void setTaskData(Task taskData) {
+        this.taskData.postValue(taskData);
     }
 }

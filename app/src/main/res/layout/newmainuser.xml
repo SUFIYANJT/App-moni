@@ -10,21 +10,13 @@
         android:id="@+id/toolbarUSER"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-       style="@style/ActivityMain"
+        app:menu="@menu/menu_pending"
+        style="@style/ActivityUser"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerViewuser"
        >
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/menu_button"
-            android:layout_width="35dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="right"
-            app:icon="@drawable/more_vert_fill0_wght400_grad0_opsz24"
-            app:iconGravity="textStart"
-            app:iconSize="25dp"
-            style="@style/ActivityMain" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 
@@ -35,43 +27,8 @@
         app:layout_constraintTop_toBottomOf="@id/toolbarUSER"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/cardViewUSER"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardViewUSER"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-      style="@style/CardViewStyle"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarUSER">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:textColor="@color/black"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

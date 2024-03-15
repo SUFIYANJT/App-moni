@@ -9,4 +9,5 @@
     <string name="submit">submit</string>
     <string name="edit_activity">Edit Activity</string>
     <string name="employee_s_name">Employee’s name</string>
+    <string name="back">back</string>
 </resources>

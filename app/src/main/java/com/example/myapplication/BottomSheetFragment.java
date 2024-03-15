@@ -42,6 +42,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private TextInputLayout activityNameInputLayout;
     private TextInputLayout activityDescriptionInputLayout;
+    private TextInputLayout activityMachine;
+    private TextInputLayout activityComponent;
+    private TextInputLayout activitySchedule;
     private AutoCompleteTextView autoCompleteTextView;
     private AutoCompleteTextView autoCompleteTextView1;
     private AutoCompleteTextView autoCompleteTextView2;
@@ -102,6 +105,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         autoCompleteTextView2 = view.findViewById(R.id.autoCompleteTextView2);
         confirmButton = view.findViewById(R.id.confirmButton);
         machine = new MachineAdapter(requireContext(),machines);
+        activityMachine=view.findViewById(R.id.textInputDropdown);
+        activityComponent=view.findViewById(R.id.textInputDropdown1);
+        activitySchedule=view.findViewById(R.id.textInputDropdown2);
         component = new MachineAdapter(requireContext(),components);
         schedule = new MachineAdapter(requireContext(),schedules);
         bottomSheetFragment=this;
@@ -129,27 +135,29 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         } else if (Objects.requireNonNull(activityDescriptionInputLayout.getEditText()).getText().toString().isEmpty()) {
             activityDescriptionInputLayout.setError("Insert the Description/Procedure");
         } else if (autoCompleteTextView.getText().toString().isEmpty()) {
-            autoCompleteTextView.setError("select a machine");
+            activityMachine.setError("select a machine");
         }else if(autoCompleteTextView1.getText().toString().isEmpty()){
-            autoCompleteTextView1.setError("select a component");
+            activityComponent.setError("select a component");
         } else if (autoCompleteTextView2.getText().toString().isEmpty()) {
-            autoCompleteTextView2.setError("select a schedule ");
+            activitySchedule.setError("select a schedule ");
+        }else {
+            Activity activity = new Activity();
+            activity.activityName = activityNameInputLayout.getEditText().getText().toString();
+            activity.activityDescription = activityDescriptionInputLayout.getEditText().getText().toString();
+            activity.activity_satuts_id = 1;
+            int lengthm = autoCompleteTextView.getText().toString().length();
+            int lengthc = autoCompleteTextView1.getText().toString().length();
+            int lengths = autoCompleteTextView2.getText().toString().length();
+            activity.machineId = Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm - 1)));
+            activity.componentId = Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc - 1)));
+            activity.scheduleId = Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths - 1)));
+            Log.d(TAG, "confirmInput: ");
+            Date date = new Date();
+            activity.issued_date = String.valueOf(date.getTime());
+            activity.assigned_to_user="None";
+            activity.assigned_to=0;
+            MyForegroundService.foregroundService.CreateActivity(activity);
         }
-       // Toast.makeText(requireContext(), "Activity created" ,Toast.LENGTH_SHORT).show();
-        Activity activity=new Activity();
-        activity.activityName=activityNameInputLayout.getEditText().getText().toString();
-        activity.activityDescription=activityDescriptionInputLayout.getEditText().getText().toString();
-        activity.activity_satuts_id=1;
-        int lengthm=autoCompleteTextView.getText().toString().length();
-        int lengthc=autoCompleteTextView1.getText().toString().length();
-        int lengths=autoCompleteTextView2.getText().toString().length();
-        activity.machineId= Integer.parseInt(String.valueOf(autoCompleteTextView.getText().toString().charAt(lengthm-1)));
-        activity.componentId= Integer.parseInt(String.valueOf(autoCompleteTextView1.getText().toString().charAt(lengthc-1)));
-        activity.scheduleId= Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths-1)));
-        Log.d(TAG, "confirmInput: ");
-        Date date=new Date();
-        activity.issued_date= String.valueOf(date.getTime());
-        MyForegroundService.foregroundService.CreateActivity(activity);
     }
 
     @Override

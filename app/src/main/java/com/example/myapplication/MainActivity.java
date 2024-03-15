@@ -3,6 +3,7 @@ package com.example.myapplication;
 import static com.example.myapplication.service.MyForegroundService.no_of_running_service;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -33,6 +34,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.myapplication.Support.Activity;
+import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -40,6 +42,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -80,17 +83,72 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Activity activity = (Activity) intent.getSerializableExtra("activity");
-            String change = intent.getStringExtra("change");
+            String change = null;
+            if (activity != null) {
+                change = activity.change;
+            }
+            String uiChange = null;
+            if (activity != null) {
+                uiChange = activity.uiChange;
+            }
             Log.d(TAG, "onReceive: Change state: " + change);
+            Log.d(TAG, "onReceive: Change state: " + uiChange);
             if (activity != null) {
                 Log.d(TAG, "onReceive: Received activity: " + activity.activityName);
             }
+            Log.d(TAG, "onReceive: calledby "+intent.getStringExtra("calledby"));
             Log.d(TAG, "onReceive: activity is "+activity.activity_satuts_id);
+            // Remove matching activity from ExistingActivities list
+            if (!ExistingActivities.isEmpty()) {
+                Iterator<Activity> iterator = ExistingActivities.iterator();
+                while (iterator.hasNext()) {
+                    Activity a = iterator.next();
+                    if (a.activityId == activity.activityId) {
+                        iterator.remove();
+                    }
+                }
+            }
+
+// Remove matching activity from IssuedActivities list
+            if (!IssuedActivities.isEmpty()) {
+                Iterator<Activity> iterator = IssuedActivities.iterator();
+                while (iterator.hasNext()) {
+                    Activity a = iterator.next();
+                    if (a.activityId == activity.activityId) {
+                        iterator.remove();
+                    }
+                }
+            }
+
+// Remove matching activity from PendingActivities list
+            if (!PendingActivities.isEmpty()) {
+                Iterator<Activity> iterator = PendingActivities.iterator();
+                while (iterator.hasNext()) {
+                    Activity a = iterator.next();
+                    if (a.activityId == activity.activityId) {
+                        iterator.remove();
+                    }
+                }
+            }
+
+// Remove matching activity from ReviewActivities list
+            if (!ReviewActivities.isEmpty()) {
+                Iterator<Activity> iterator = ReviewActivities.iterator();
+                while (iterator.hasNext()) {
+                    Activity a = iterator.next();
+                    if (a.activityId == activity.activityId) {
+                        iterator.remove();
+                    }
+                }
+            }
+
             if (activity.activity_satuts_id == 1) {
-                if (change != null && change.equals("create")) {
-                    ExistingActivities.add(activity);
+                if (change != null && uiChange.equals("create")) {
+                    if (!ExistingActivities.contains(activity) ){
+                        ExistingActivities.add(activity);
+                    }
                     Log.d(TAG, "onReceive: Added new activity: " + activity.activityName);
-                } else if (change != null && change.equals("update")) {
+                } else if (change != null && uiChange.equals("update")) {
                     int i = 0;
                     for (Activity act : ExistingActivities) {
                         Log.d(TAG, "onReceive: activity id checking " + act.activityId + " " + activity.activityId);
@@ -99,22 +157,30 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "onReceive: Updated activity: " + activity.activityName);
                             break;
                         }
-                        if(context instanceof MainActivity){
-                            MainActivity activity1=(MainActivity) context;
-                           // Snackbar.make(activity1.findViewById(R.id.parent),"New Activity created",Snackbar.LENGTH_SHORT).show();
-                            Toast.makeText(context,"New activity created",Toast.LENGTH_SHORT).show();
-                        }
                         i++;
                     }
                     Log.d(TAG, "onReceive: ExistingActivities size: " + ExistingActivities.size() + ", i: " + i);
+                }else if(change!=null && uiChange.equals("delete")){
+                    int i=0;
+                    for (Activity act : ExistingActivities) {
+                        Log.d(TAG, "onReceive: activity id checking " + act.activityId + " " + activity.activityId);
+                        if (activity != null && act.activityId == activity.activityId) {
+                           ExistingActivities.remove(i);
+                            Log.d(TAG, "onReceive: deleting activity: " + activity.activityName);
+                            break;
+                        }
+                        i++;
+                    }
+
                 }
+                Log.d(TAG, "onReceive: size of the arraylist is "+ExistingActivities.size());
                 // Update LiveData
                 itemModel.setActivityMutableLiveData(ExistingActivities);
             } else if (activity.activity_satuts_id == 2) {
-                if (change != null && change.equals("create")) {
+                if (change != null && uiChange.equals("create")) {
                     IssuedActivities.add(activity);
                     Log.d(TAG, "onReceive: Added new activity for issued : " + activity.activityName);
-                } else if (change != null && change.equals("update")) {
+                } else if (change != null && uiChange.equals("update")) {
                     int i = 0;
                     boolean flag=true;
                     for (Activity act : IssuedActivities) {
@@ -191,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
         fragmentAdapter.addFragment(new PendingActivity(), "Pending Activity");
         fragmentAdapter.addFragment(new InspectorReview(), "Inspector Review");
         viewPager.setAdapter(fragmentAdapter);
+        viewPager.setOffscreenPageLimit(4);
         tabLayout.setupWithViewPager(viewPager);
         MaterialToolbar toolbar=findViewById(R.id.toolbar);
         toolbar.setTitle("Tranvancore Cements");
@@ -205,8 +272,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         permissionCall();
-        // Check if the permission is not granted
-
     }
     public void permissionCall(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -221,23 +286,20 @@ public class MainActivity extends AppCompatActivity {
             startService();
         }
     }
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public void startService(){
         Log.d(TAG, "onCreate: checking service bound ");
         serviceIntent = new Intent(this, MyForegroundService.class);
         IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA");
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-            //MyBroadcastReceiver myBroadcastReceiver=new MyBroadcastReceiver(ExistingActivities,IssuedActivities,PendingActivities,ReviewActivities,itemModel,this);
-            //registerReceiver(myBroadcastReceiver,filter, Context.RECEIVER_NOT_EXPORTED);
-            LocalBroadcastManager.getInstance(this.getApplicationContext()).registerReceiver(broadcastReceiver,filter);
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(broadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                LocalBroadcastManager.getInstance(this.getApplicationContext()).registerReceiver(broadcastReceiver,filter);
             } else {
+                Log.d(TAG, "startService: registering broadcast...");
                 registerReceiver(broadcastReceiver, filter);
             }
         }else{
+            Log.d(TAG, "startService: registering broadcast...");
             registerReceiver(broadcastReceiver, filter);
         }
         if (isServiceRunning(MyForegroundService.class)) {
@@ -245,8 +307,7 @@ public class MainActivity extends AppCompatActivity {
             bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             Log.d(TAG, "onCreate: starting the service because no service found ");
         } else {
-
-                MyForegroundService.foregroundService.getExistingActivity();
+            MyForegroundService.foregroundService.getExistingActivity();
         }
     }
     @Override
@@ -317,6 +378,10 @@ public class MainActivity extends AppCompatActivity {
             // Handle Item 2 selection
             return true;
         } else if (id == R.id.menu_logout) {
+            UserPreferences.saveUser(this.getApplicationContext(),null);
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             // Handle Item 3 selection
             return true;
         } else {
