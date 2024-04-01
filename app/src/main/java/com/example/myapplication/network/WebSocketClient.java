@@ -2,17 +2,16 @@ package com.example.myapplication.network;
 
 import static com.example.myapplication.LoginActivity.TAG;
 
-import android.app.Application;
 import android.content.Context;
+import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.myapplication.LoginActivity;
+import com.example.myapplication.ReportTransfer;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.SubmitHolder;
@@ -21,20 +20,18 @@ import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.service.MyForegroundService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +45,7 @@ import okio.ByteString;
 
 public class WebSocketClient extends WebSocketListener {
     WebSocket webSocket;
+    ReportTransfer newWindow;
     ItemModel model;
     Context context;
     MyForegroundService foregroundService;
@@ -55,26 +53,38 @@ public class WebSocketClient extends WebSocketListener {
     private final int maxRetries = 5;
     private int retryCount = 0;
     int getActivityCallCount = 0;
+
     private final String ipAddress= "ws://192.168.43.174:8000/chat/";
     public WebSocketClient(Context context, MyForegroundService foregroundService){
-        connect();
         this.context=context;
         this.foregroundService=foregroundService;
-
+        connect();
     }
     public WebSocketClient(Context context){
+        String userid="userid/";
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        if(user!=null){
+            userid=user.getUser_id()+"/";
+        }
+        Log.d(TAG, "WebSocketClient: userid is "+userid);
         OkHttpClient okHttpClient=new OkHttpClient();
         Request request=new Request.Builder()
-                .url(ipAddress)
+                .url(ipAddress+userid)
                 .build();
         webSocket=okHttpClient.newWebSocket(request,this);
         this.context=context;
     }
 
     public void connect(){
+        Log.d(TAG, "connect: is used to connect...");
+        String userid="userid/";
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        if(user!=null){
+            userid=user.getUser_id()+"/";
+        }
         OkHttpClient okHttpClient=new OkHttpClient();
         Request request=new Request.Builder()
-                .url(ipAddress)
+                .url(ipAddress+userid)
                 .build();
         webSocket=okHttpClient.newWebSocket(request,this);
     }
@@ -280,7 +290,8 @@ public class WebSocketClient extends WebSocketListener {
 
     @Override
     public void onMessage(@NonNull WebSocket webSocket, @NonNull ByteString bytes) {
-        Log.d(TAG, "onMessage: message on the bytes "+bytes.base64());
+        byte[] data=bytes.toByteArray();
+        foregroundService.SendFileData(data);
     }
 
     @Override
@@ -368,6 +379,7 @@ public class WebSocketClient extends WebSocketListener {
                     Log.d(TAG, "onMessage: functioning activity received " + activityName + " " + activityAssignedId);
                     Log.d(TAG, "onMessage: activity changes " + ui_activityChange + " " + activityChange);
                     Log.d(TAG, "onMessage: activity changes " + ui_activityChange + " " + activityChange);
+                    Log.d(TAG, "onMessage: foregroundService instance is.... "+foregroundService);
                     foregroundService.setExistingActivity(activity);
                     Log.d(TAG, "onMessage: updating ");
                 } catch (JSONException e) {
@@ -476,6 +488,50 @@ public class WebSocketClient extends WebSocketListener {
                 e.printStackTrace();
             }
 
+        } else if (text.contains("report")) {
+            JSONObject jsonObject= null;
+            try {
+                jsonObject = new JSONObject(text);
+                String reportFrom=jsonObject.getString("report_from");
+                int reportUserId=jsonObject.getInt("report_user_id");
+                JSONObject reportsObject = jsonObject.getJSONObject("reports");
+                JSONArray textArray = reportsObject.getJSONArray("text");
+                JSONArray audioArray = reportsObject.getJSONArray("audio");
+                JSONArray imageArray = reportsObject.getJSONArray("image");
+                String[] images = new String[imageArray.length()];
+                String[] audios=new String[audioArray.length()];
+                String[] texts=new String[textArray.length()];
+                for (int i = 0; i < imageArray.length(); i++) {
+                    String imagePath = imageArray.getString(i);
+                    images[i]=imagePath;
+                    Log.d(TAG, "onMessage: imageArray..."+imagePath.replace("\"",""));
+                }
+                for (int i = 0; i < audioArray.length(); i++) {
+                    String audioPath = imageArray.getString(i);
+                    audios[i]=audioPath;
+                    Log.d(TAG, "onMessage: imageArray..."+audioPath.replace("\"",""));
+                }
+                for (int i = 0; i < textArray.length(); i++) {
+                    String textPath = imageArray.getString(i);
+                    texts[i]=textPath;
+                    Log.d(TAG, "onMessage: imageArray..."+textPath.replace("\"",""));
+                }
+                Log.d(TAG, "onMessage: reportTransfer is..."+newWindow);
+                newWindow.setAudio(audios);
+                newWindow.setImage(images);
+                newWindow.setText(texts);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (text.contains("file-size")) {
+            try {
+                JSONObject jsonObject=new JSONObject(text);
+                int size=jsonObject.getInt("file-size");
+                Log.d(TAG, "onMessage: file size is ..."+size);
+                foregroundService.fileSize(size);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
     public void getUsers(CharSequence sequence){
@@ -540,46 +596,151 @@ public class WebSocketClient extends WebSocketListener {
         }
     }
 
-    public void sendReport(ArrayList<SubmitHolder> submitHolders) {
+    public void sendReport(ArrayList<SubmitHolder> submitHolders, Context context, int taskId) {
         if(submitHolders.size()>0){
+            int i=0;
             for (SubmitHolder s :
                     submitHolders) {
-                Log.d(TAG, "sendReport: sending text ....");
-                if(!s.getTextView().equals(""))
-                    webSocket.send(s.getTextView());
-                Log.d(TAG, "sendReport: sending audio ....");
-                if(s.getFile()!=null){
-                    try {
-                        FileInputStream fileInputStream=new FileInputStream(s.getFile());
-                        byte[] buf =new byte[1024];
-                        int len=0;
-                        while ((len=fileInputStream.read(buf))!=-1){
-                            ByteBuffer byteBuffer=ByteBuffer.wrap(buf);
-                            webSocket.send(new ByteString(buf));
+               JSONObject jsonObject=new JSONObject();
+                try {
+                    if(s.getImageFile()==null&&s.getFile()==null) {
+                        byte[] bytes=s.getTextView().getBytes();
+                        JSONObject textData = new JSONObject();
+                        textData.put("id", i);
+                        textData.put("type", "text");
+                        String base64Data = android.util.Base64.encodeToString(bytes, android.util.Base64.DEFAULT);
+                        textData.put("uploaded", 0);
+                        textData.put("size",bytes.length);
+                        textData.put("content", base64Data);
+                        jsonObject.put("report_id",taskId);
+                        jsonObject.put("task_id",taskId);
+                        jsonObject.put("total_item",submitHolders.size()-1);
+                        Log.d(TAG, "sendReport: uploaded size and total size "+base64Data.length()+" "+base64Data.length());
+                        User user=UserPreferences.getUser(context.getApplicationContext());
+                        if (user != null) {
+                            jsonObject.put("user_id",user.getUser_id());
+                        }else {
+                            Log.d(TAG, "sendReport: user is null...");
                         }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.d(TAG, "sendReport: sending image ....");
-                if(s.getImageFile()!=null){
-                    try {
-                        FileInputStream fileInputStream=new FileInputStream(s.getImageFile().getPath());
-                        byte[] buf =new byte[1024];
-                        int len=0;
-                        while ((len=fileInputStream.read(buf))!=-1){
-                            ByteBuffer byteBuffer=ByteBuffer.wrap(buf);
-                            webSocket.send(new ByteString(buf));
+                        jsonObject.put("report", textData);
+                        webSocket.send(jsonObject.toString());
+                    } else if (s.getTextView() == null && s.getFile() == null) {
+                        int len;
+                        float upload=0;
+                        FileInputStream fileInputStream= (FileInputStream) context.getContentResolver().openInputStream(s.getImageFile());
+                        byte[] b =new byte[1024];
+                        ParcelFileDescriptor parcelFileDescriptor = context.getContentResolver().openFileDescriptor(s.getImageFile(), "r");
+                        long size = parcelFileDescriptor.getStatSize();
+                        parcelFileDescriptor.close();
+                        if (fileInputStream != null) {
+                            while ((len=fileInputStream.read(b))!=-1) {
+                                String base64Data = android.util.Base64.encodeToString(b,0,len, android.util.Base64.DEFAULT);
+                                Log.d(TAG, "sendReport: string size :  "+len+" "+b.length);
+                                JSONObject imageData = new JSONObject();
+                                imageData.put("id",i);
+                                imageData.put("type", "image");
+                                imageData.put("content",base64Data);
+                                imageData.put("uploaded",upload);
+                                imageData.put("size",size);
+                                jsonObject.put("report", imageData);
+                                jsonObject.put("report_id",taskId);
+                                jsonObject.put("total_item",submitHolders.size()-1);
+                                jsonObject.put("task_id",taskId);
+                                User user=UserPreferences.getUser(context.getApplicationContext());
+                                if (user != null) {
+                                    jsonObject.put("user_id",user.getUser_id());
+                                }else {
+                                    Log.d(TAG, "sendReport: user is null...");
+                                }
+                                webSocket.send(jsonObject.toString());
+                                upload=upload+len;
+                            }
+                            fileInputStream.close();
                         }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } else if (s.getTextView() == null && s.getImageFile() == null) {
+                        File file=s.getFile();
+                        if(file!=null) {
+                            FileInputStream fileInputStream = new FileInputStream(file);
+                            int len = 0;
+                            float upload=0;
+                            long size=file.length();
+                            byte[] b=new byte[1024];
+                            while((len=fileInputStream.read(b))!=-1){
+                                String base64Data = android.util.Base64.encodeToString(b,0,len, android.util.Base64.DEFAULT);
+                                Log.d(TAG, "sendReport: string size :  "+len+" "+b.length);
+                                JSONObject audioData = new JSONObject();
+                                audioData.put("id",i);
+                                audioData.put("type", "audio");
+                                audioData.put("content",base64Data);
+                                audioData.put("uploaded",upload);
+                                audioData.put("size",size);
+                                jsonObject.put("report", audioData);
+                                jsonObject.put("report_id",taskId);
+                                jsonObject.put("total_item",submitHolders.size()-1);
+                                jsonObject.put("task_id",taskId);
+                                User user=UserPreferences.getUser(context.getApplicationContext());
+                                if (user != null) {
+                                    jsonObject.put("user_id",user.getUser_id());
+                                }else {
+                                    Log.d(TAG, "sendReport: user is null...");
+                                }
+                                webSocket.send(jsonObject.toString());
+                                upload=upload+len;
+                            }
+                        }
                     }
+
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
                 }
+                i++;
             }
         }
+    }
+    public static byte[] readBytesFromFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        byte[] fileBytes = new byte[(int) file.length()];
+        try (FileInputStream fileInputStream = new FileInputStream(file)) {
+            fileInputStream.read(fileBytes);
+        }
+        return fileBytes;
+    }
+    public static String encodeBytesToBase64(byte[] bytes) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return Base64.getEncoder().encodeToString(bytes);
+        }
+        return null;
+    }
+
+    public void getReport(ReportTransfer newWindow, int activityId) {
+        this.newWindow=newWindow;
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("user_id",user.getUser_id());
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("report-get",activityId);
+                webSocket.send(jsonObject.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getFile(String file, int position) {
+        User user=UserPreferences.getUser(context.getApplicationContext());
+        JSONObject jsonObject=new JSONObject();
+        try {
+            if (user != null) {
+                jsonObject.put("user_id",user.getUser_id());
+                jsonObject.put("username",user.getUsername());
+                jsonObject.put("file-get",file);
+                webSocket.send(jsonObject.toString());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        webSocket.send(jsonObject.toString());
     }
 }

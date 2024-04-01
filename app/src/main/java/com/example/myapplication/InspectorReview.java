@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
+import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,11 @@ public class InspectorReview extends Fragment  implements SearchableFragment{
     CustomAdapter customAdapter;
     ItemModel itemModel;
     ArrayList<Activity> activities=new ArrayList<>();
+    MyForegroundService foregroundService;
+    public InspectorReview(MyForegroundService foreground) {
+        this.foregroundService=foreground;
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,6 +56,7 @@ public class InspectorReview extends Fragment  implements SearchableFragment{
             @Override
             public void onItemClick(Activity item, int position) {
                 Intent intent = new Intent(requireContext(), NewWindow.class);
+                intent.putExtra("activity",item);
                 startActivity(intent);
             }
 

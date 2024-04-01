@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
+import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -29,9 +30,10 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
     private List<ItemModel> itemList;
     private ItemModel itemModel;
     ArrayList<Activity> activities=new ArrayList<>();
-
-    public ExistingActivity() {
-        // Required empty public constructor
+    MyForegroundService foregroundService;
+    public ExistingActivity(MyForegroundService foreground) {
+        this.foregroundService=foreground;
+        Log.d(TAG, "ExistingActivity: foregroundService "+foregroundService);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -66,7 +68,7 @@ public class ExistingActivity extends Fragment implements SearchableFragment {
         adapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Activity item, int position) {
-                MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position);
+                MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position,foregroundService);
                 bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
             }
             @Override

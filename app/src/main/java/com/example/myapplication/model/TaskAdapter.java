@@ -12,23 +12,24 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.myapplication.NewWindow;
 import com.example.myapplication.R;
 import com.example.myapplication.Support.Task;
 import com.example.myapplication.UsercardWindow;
+import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textview.MaterialTextView;
-import com.google.android.material.transition.Hold;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     ArrayList<Task> tasks;
+    MyForegroundService foregroundService;
     Context context;
-    public TaskAdapter(Context context,ArrayList<Task> tasks){
+    public TaskAdapter(Context context, ArrayList<Task> tasks, MyForegroundService foregroundService){
         this.tasks=tasks;
         this.context=context;
+        this.foregroundService=foregroundService;
     }
     @NonNull
     @Override

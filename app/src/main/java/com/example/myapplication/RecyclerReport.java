@@ -39,6 +39,12 @@ public class RecyclerReport extends RecyclerView.Adapter<RecyclerReport.ItemHold
         this.submitHolders =submitHolders;
         this.usercardWindow=usercardWindow;
     }
+
+    public RecyclerReport(Activity activity, ArrayList<SubmitHolder> submitHolders) {
+        this.activity=activity;
+        this.submitHolders=submitHolders;
+    }
+
     @NonNull
     @Override
     public RecyclerReport.ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

@@ -10,4 +10,7 @@
     <string name="edit_activity">Edit Activity</string>
     <string name="employee_s_name">Employee’s name</string>
     <string name="back">back</string>
+    <string name="view">view</string>
+    <string name="approve">approve</string>
+    <string name="reject">reject</string>
 </resources>

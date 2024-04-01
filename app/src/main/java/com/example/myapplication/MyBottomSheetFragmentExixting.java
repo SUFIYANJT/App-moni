@@ -56,13 +56,16 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
     ArrayList<Activity> activities;
     int i=0;
     int position;
-    public MyBottomSheetFragmentExixting(Activity activity, ArrayList<Activity> activities, int position) {
+    MyForegroundService foregroundService;
+    public MyBottomSheetFragmentExixting(Activity activity, ArrayList<Activity> activities, int position, MyForegroundService foregroundService) {
         // Required empty public constructor
         this.activity=activity;
         this.position=position;
         this.activities=activities;
+        this.foregroundService=foregroundService;
         Log.d(TAG, "MyBottomSheetFragmentExixting: activity id "+activity.activityId);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -111,7 +114,7 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
                 Log.d(TAG, "onChanged: Users list is empty or null");
             }
         });
-        MyForegroundService.foregroundService.setUi(this.requireActivity());
+        foregroundService.setUi(this.requireActivity());
         itemModel.getCallBack().observe(getViewLifecycleOwner(), data -> {
             Log.d(TAG, "onCreateView: updating the string from background ");
             if (data.equals("update")&&i!=0) {
@@ -145,7 +148,7 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                MyForegroundService.foregroundService.getUsers(s, requireActivity());
+                foregroundService.getUsers(s, requireActivity());
             }
             @Override
             public void afterTextChanged(Editable s) {
@@ -173,7 +176,7 @@ public class MyBottomSheetFragmentExixting extends BottomSheetDialogFragment  {
                 itemModel.setIntegerMutableLiveData(position);
                 Log.d(TAG, "onCreateView: activity assigned to " + activity1.activityName + " " + activity1.activityId);
                 activity.change="update";
-                MyForegroundService.foregroundService.setChangeActivity(activity1);
+                foregroundService.setChangeActivity(activity1);
             }else{
                 Log.d(TAG, "onCreateView: activity name " + activity.activityName+" "+activity.assigned_to_user);
             }

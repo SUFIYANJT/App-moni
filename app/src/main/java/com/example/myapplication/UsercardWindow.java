@@ -44,6 +44,7 @@ public class UsercardWindow extends AppCompatActivity  {
     private static final int REQUEST_PERMISSION_CODE = 100;
     private MaterialButton seekBar;
     private MediaRecorder mediaRecorder;
+    MyForegroundService myForegroundService;
 
     private boolean isRecording = false;
     private boolean isPlaying=false;
@@ -84,6 +85,7 @@ public class UsercardWindow extends AppCompatActivity  {
         setContentView(R.layout.usercardwindow);
         Intent intent1=getIntent();
         task = (Task) intent1.getSerializableExtra("task");
+        myForegroundService= newmainuser.myForegroundService;
         MaterialToolbar materialToolbar=findViewById(R.id.toolbaruserwindow);
         if (task != null) {
             Log.d(TAG, "onCreate: task is "+task.getActivityName());
@@ -101,7 +103,7 @@ public class UsercardWindow extends AppCompatActivity  {
         MaterialButton attachmentButton = findViewById(R.id.attachmentButton);
         seekBar=findViewById(R.id.progress_linear_bar);
         seekBar.setOnClickListener(v->{
-            MyForegroundService.foregroundService.sendReport(submitHolders);
+            myForegroundService.sendReport(submitHolders,task.getTask_id());
         });
         sendButton.setOnClickListener(v -> sendMessage());
         voiceMessageButton.setOnClickListener(v -> recordVoiceMessage());

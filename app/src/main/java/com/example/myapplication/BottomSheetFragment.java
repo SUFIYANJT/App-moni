@@ -39,6 +39,11 @@ import java.util.Date;
 import java.util.Objects;
 
 public class BottomSheetFragment extends BottomSheetDialogFragment {
+    MyForegroundService foregroundService;
+    public BottomSheetFragment(MyForegroundService foregroundService){
+        this.foregroundService=foregroundService;
+    }
+
 
     private TextInputLayout activityNameInputLayout;
     private TextInputLayout activityDescriptionInputLayout;
@@ -118,9 +123,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         autoCompleteTextView2.setAdapter(schedule);
         if(machines.size()==0&&components.size()==0&&schedules.size()==0) {
             Log.d(TAG, "onCreateView: all are null ");
-            MyForegroundService.foregroundService.getComponent();
-            MyForegroundService.foregroundService.getMachine();
-            MyForegroundService.foregroundService.getSchedule();
+            foregroundService.getComponent();
+            foregroundService.getMachine();
+            foregroundService.getSchedule();
         }
         confirmButton.setOnClickListener(view1 -> confirmInput());
         activityDescriptionInputLayout=view.findViewById(R.id.Description);
@@ -156,7 +161,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             activity.issued_date = String.valueOf(date.getTime());
             activity.assigned_to_user="None";
             activity.assigned_to=0;
-            MyForegroundService.foregroundService.CreateActivity(activity);
+            foregroundService.CreateActivity(activity);
         }
     }
 

@@ -25,11 +25,13 @@ public class BottomSheetDialogFragmentIssued extends DialogFragment {
     private Integer position;
     ItemModel itemModel;
     private String message;
-    public BottomSheetDialogFragmentIssued(Activity activity,Integer position,String message){
+    MyForegroundService myForegroundService;
+    public BottomSheetDialogFragmentIssued(Activity activity,Integer position,String message,MyForegroundService myForegroundService){
         Log.d(TAG, "BottomSheetDialogFragmentIssued: called on click "+activity.activityId);
         this.activity=activity;
         this.position=position;
         this.message=message;
+        this.myForegroundService=myForegroundService;
     }
 
     @SuppressLint("SetTextI18n")
@@ -52,7 +54,7 @@ public class BottomSheetDialogFragmentIssued extends DialogFragment {
             }else {
                 activity.change="update";
             }
-            MyForegroundService.foregroundService.setChangeActivity(activity);
+            myForegroundService.setChangeActivity(activity);
             dismiss();
         });
         return view;

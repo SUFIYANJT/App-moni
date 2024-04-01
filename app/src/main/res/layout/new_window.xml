@@ -5,27 +5,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="0dp">
-
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
+        app:menu="@menu/menu_back"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        style="@style/Cantainer"
+        app:subtitleTextColor="@color/darkBackground"
+        app:navigationIconTint="@color/darkLight"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:titleTextColor="#FFF">
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/back_buttonins"
-            android:layout_width="35dp"
-            android:layout_height="match_parent"
-            app:icon="@drawable/baseline_arrow_back_24"
-            app:iconGravity="textStart"
-            app:iconSize="25dp"
-            style="@style/ActivityMain"
-
+        app:titleTextColor="#FFF"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewuser"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/button_layout"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1"
+        android:id="@+id/button_layout"
+        >
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/approve"
+            android:layout_weight="1"
+            android:id="@+id/approve"
             />
-
-    </com.google.android.material.appbar.MaterialToolbar>
-
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/reject"
+            android:layout_weight="1"
+            android:id="@+id/reject"
+            />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

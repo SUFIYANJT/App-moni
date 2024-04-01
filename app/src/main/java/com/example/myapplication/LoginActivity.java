@@ -1,43 +1,28 @@
 package com.example.myapplication;
 
-import static com.example.myapplication.service.MyForegroundService.foregroundService;
 import static com.example.myapplication.service.MyForegroundService.no_of_running_service;
 
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
-import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.network.WebSocketClient;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -57,6 +42,7 @@ public class LoginActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             this.name = name;
             this.service = service;
+            Log.d(TAG, "onServiceConnected: service connection started...");
             MyForegroundService.MyBinder binder = (MyForegroundService.MyBinder) service;
             foreground = binder.getService();
             isBound = true;

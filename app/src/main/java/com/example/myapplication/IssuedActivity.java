@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MyBroadcastReceiver;
+import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.Serializable;
@@ -31,6 +32,12 @@ public class IssuedActivity extends Fragment  implements SearchableFragment {
     CustomAdapter customAdapter;
     ItemModel itemModel;
     ArrayList<Activity> activities=new ArrayList<>();
+    MyForegroundService foregroundService;
+
+    public IssuedActivity(MyForegroundService foreground) {
+        this.foregroundService=foreground;
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,7 +72,7 @@ public class IssuedActivity extends Fragment  implements SearchableFragment {
             public void onItemClick(Activity item, int position) {}
             @Override
             public void onItemClick(Activity item, int position, String message) {
-                BottomSheetDialogFragmentIssued bottomSheetFragment = new BottomSheetDialogFragmentIssued(item,position,message);
+                BottomSheetDialogFragmentIssued bottomSheetFragment = new BottomSheetDialogFragmentIssued(item,position,message,foregroundService);
                 bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
             }
         });

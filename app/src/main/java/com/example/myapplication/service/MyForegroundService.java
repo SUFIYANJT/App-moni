@@ -1,6 +1,5 @@
 package com.example.myapplication.service;
 
-import static android.Manifest.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE;
 import static com.example.myapplication.LoginActivity.TAG;
 
 import android.Manifest;
@@ -20,7 +19,6 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -30,9 +28,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.myapplication.MainActivity;
-import com.example.myapplication.MyBottomSheetFragmentExixting;
-import com.example.myapplication.NetworkConnector;
 import com.example.myapplication.R;
+import com.example.myapplication.ReportTransfer;
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.Support.Machine;
 import com.example.myapplication.Support.SubmitHolder;
@@ -42,14 +39,11 @@ import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MyBroadcastReceiver;
 import com.example.myapplication.network.WebSocketClient;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.gson.Gson;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Locale;
 
-public class MyForegroundService extends Service implements NetworkConnector {
+public class MyForegroundService extends Service implements Serializable {
     public static MyForegroundService foregroundService;
     private FragmentActivity activity;
     public User user = null;
@@ -59,6 +53,9 @@ public class MyForegroundService extends Service implements NetworkConnector {
     WebSocketClient webSocketClient;
     ItemModel itemModel;
     Context context;
+    ReportTransfer reportTransfer;
+    MyBinder binder=new MyBinder();
+
 
     @Override
     public void onCreate() {
@@ -70,7 +67,7 @@ public class MyForegroundService extends Service implements NetworkConnector {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
 
     @Override
@@ -279,21 +276,6 @@ public class MyForegroundService extends Service implements NetworkConnector {
         }
     }
 
-    @Override
-    public int checkAuth(String username, String password) {
-        return webSocketClient.Auth(username,password)?1:0;
-    }
-
-    @Override
-    public int sendMessage(Gson gson) {
-        return 0;
-    }
-
-    @Override
-    public Gson message() {
-        return null;
-    }
-
     public void getTask() {
         webSocketClient.getTask();
     }
@@ -305,8 +287,23 @@ public class MyForegroundService extends Service implements NetworkConnector {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 
-    public void sendReport(ArrayList<SubmitHolder> submitHolders) {
-        webSocketClient.sendReport(submitHolders);
+    public void sendReport(ArrayList<SubmitHolder> submitHolders, int taskId) {
+        webSocketClient.sendReport(submitHolders,getApplicationContext(),taskId);
+    }
+
+    public void getReport(ReportTransfer newWindow, int activityId) {
+        webSocketClient.getReport(newWindow,activityId);
+    }
+
+    public void getFile(String file, ReportTransfer reportTransfer, int position) {
+        this.reportTransfer=reportTransfer;
+        webSocketClient.getFile(file,position);
+    }
+    public void SendFileData(byte[] data){
+        reportTransfer.setFileData(data);
+    }
+    public void fileSize(int size){
+        reportTransfer.fileSize(size);
     }
 
     public class MyBinder extends Binder {

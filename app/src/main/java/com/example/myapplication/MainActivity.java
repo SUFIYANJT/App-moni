@@ -43,7 +43,6 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
 public class MainActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
@@ -52,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private BottomSheetFragment bottomSheetFragment;
     MyForegroundService foreground;
+    @SuppressLint("StaticFieldLeak")
+    public static MyForegroundService myForegroundService;
     boolean isBound=false;
     Intent serviceIntent;
     ArrayList<Activity> ExistingActivities=new ArrayList<>();
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
             this.service = service;
             MyForegroundService.MyBinder binder = (MyForegroundService.MyBinder) service;
             foreground = binder.getService();
+            myForegroundService=foreground;
+            setTabs();
             isBound = true;
         }
 
@@ -251,19 +254,13 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tablayout);
         viewPager = findViewById(R.id.viewPager);
         fab = findViewById(R.id.fab);
-        FragmentAdapter fragmentAdapter = new FragmentAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
-        fragmentAdapter.addFragment(new ExistingActivity(), "Existing Activity");
-        fragmentAdapter.addFragment(new IssuedActivity(), "Issued Activity");
-        fragmentAdapter.addFragment(new PendingActivity(), "Pending Activity");
-        fragmentAdapter.addFragment(new InspectorReview(), "Inspector Review");
-        viewPager.setAdapter(fragmentAdapter);
-        viewPager.setOffscreenPageLimit(4);
         tabLayout.setupWithViewPager(viewPager);
         MaterialToolbar toolbar=findViewById(R.id.toolbar);
         toolbar.setTitle("Tranvancore Cements");
         setSupportActionBar(toolbar);
-        bottomSheetFragment = new BottomSheetFragment();
+        Log.d(TAG, "onCreate: foreground value is..."+foreground);
         fab.setOnClickListener(view -> {
+            bottomSheetFragment = new BottomSheetFragment(foreground);
             Log.d(TAG, "onCreate: clicked the to open/close the bottom sheet fragment ");
             if (bottomSheetFragment.isVisible()) {
                 bottomSheetFragment.dismiss();
@@ -272,6 +269,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         permissionCall();
+    }
+    public void setTabs(){
+        FragmentAdapter fragmentAdapter = new FragmentAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        fragmentAdapter.addFragment(new ExistingActivity(foreground), "Existing Activity");
+        fragmentAdapter.addFragment(new IssuedActivity(foreground), "Issued Activity");
+        fragmentAdapter.addFragment(new PendingActivity(foreground), "Pending Activity");
+        fragmentAdapter.addFragment(new InspectorReview(foreground), "Inspector Review");
+        viewPager.setAdapter(fragmentAdapter);
+        viewPager.setOffscreenPageLimit(4);
     }
     public void permissionCall(){
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -302,12 +308,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "startService: registering broadcast...");
             registerReceiver(broadcastReceiver, filter);
         }
-        if (isServiceRunning(MyForegroundService.class)) {
+        if (isNotServiceRunning(MyForegroundService.class)) {
             ContextCompat.startForegroundService(MainActivity.this, serviceIntent);
             bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             Log.d(TAG, "onCreate: starting the service because no service found ");
         } else {
-            MyForegroundService.foregroundService.getExistingActivity();
+            foreground.getExistingActivity();
         }
     }
     @Override
@@ -336,9 +342,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public boolean isServiceRunning(Class<?> serviceClass) {
+    public boolean isNotServiceRunning(Class<?> serviceClass) {
         Log.d(TAG, "isServiceRunning: Called to check if a service is running "+no_of_running_service);
-        return no_of_running_service == 0;
+        return !isBound;
     }
 
     @Override

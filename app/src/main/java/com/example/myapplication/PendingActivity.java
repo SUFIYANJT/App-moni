@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.Support.Activity;
 import com.example.myapplication.model.ItemModel;
+import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -33,6 +34,11 @@ public class PendingActivity extends Fragment  implements SearchableFragment{
     CustomAdapter customAdapter;
     ItemModel itemModel;
     ArrayList<Activity> activities=new ArrayList<>();
+    MyForegroundService foregroundService;
+    public PendingActivity(MyForegroundService foreground) {
+        this.foregroundService=foreground;
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     @Nullable
     @Override

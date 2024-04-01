@@ -49,6 +49,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class newmainuser extends AppCompatActivity {
+    boolean isBound;
+    MyForegroundService foregroundService;
+    public static MyForegroundService myForegroundService;
     int BLUETOOTH_PERMISSION=104;
     Intent serviceIntent;
     ArrayList<Task> itemList;
@@ -64,11 +67,14 @@ public class newmainuser extends AppCompatActivity {
             this.name = name;
             this.service = service;
             MyForegroundService.MyBinder binder = (MyForegroundService.MyBinder) service;
+            foregroundService=binder.getService();
+            myForegroundService=foregroundService;
+            isBound=true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            isBound=false;
         }
     };
     MaterialToolbar materialToolbar;
@@ -92,16 +98,17 @@ public class newmainuser extends AppCompatActivity {
         if (user != null) {
             materialToolbar.setTitle(user.getUsername());
         }
+        setSupportActionBar(materialToolbar);
         itemList = new ArrayList<>();
         recyclerView = findViewById(R.id.recyclerViewuser);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        taskAdapter = new TaskAdapter(this,itemList);
+        taskAdapter = new TaskAdapter(this,itemList,foregroundService);
         recyclerView.setAdapter(taskAdapter);
         permissionCall();
     }
     public boolean isServiceRunning(Class<?> serviceClass) {
         Log.d(TAG, "isServiceRunning: Called to check if a service is running "+no_of_running_service);
-        return no_of_running_service == 0;
+        return !isBound;
     }
     public void permissionCall(){
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
@@ -124,7 +131,7 @@ public class newmainuser extends AppCompatActivity {
             bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
             Log.d(TAG, "onCreate: starting the service because no service found ");
         } else {
-            MyForegroundService.foregroundService.getTask();
+            foregroundService.getTask();
             bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
         Log.d(TAG, "onCreate: checking service bound ");
@@ -196,6 +203,8 @@ public class newmainuser extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate menu with items using MenuInflator
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_pending, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -214,6 +223,7 @@ public class newmainuser extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            finish();
             // Handle Item 3 selection
             return true;
         } else {
