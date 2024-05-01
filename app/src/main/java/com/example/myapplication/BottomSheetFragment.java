@@ -31,6 +31,7 @@ import com.example.myapplication.model.MachineAdapter;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.Serializable;
@@ -53,6 +54,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     private AutoCompleteTextView autoCompleteTextView;
     private AutoCompleteTextView autoCompleteTextView1;
     private AutoCompleteTextView autoCompleteTextView2;
+    private TextInputEditText textInputEditText;
     private Button confirmButton;
     View view;
     private ArrayList<Machine> machines = new ArrayList<>();
@@ -108,6 +110,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         autoCompleteTextView = view.findViewById(R.id.autoCompleteTextView);
         autoCompleteTextView1 = view.findViewById(R.id.autoCompleteTextView1);
         autoCompleteTextView2 = view.findViewById(R.id.autoCompleteTextView2);
+        textInputEditText = view.findViewById(R.id.autoCompleteTextView3);
         confirmButton = view.findViewById(R.id.confirmButton);
         machine = new MachineAdapter(requireContext(),machines);
         activityMachine=view.findViewById(R.id.textInputDropdown);
@@ -117,10 +120,12 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         schedule = new MachineAdapter(requireContext(),schedules);
         bottomSheetFragment=this;
         IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA_BOTTOM_SHEET");
+        Log.d(TAG, "onCreateView: machine"+machines.size());
         LocalBroadcastManager.getInstance(requireContext().getApplicationContext()).registerReceiver(broadcastReceiver, filter);
         autoCompleteTextView.setAdapter(machine);
         autoCompleteTextView1.setAdapter(component);
         autoCompleteTextView2.setAdapter(schedule);
+
         if(machines.size()==0&&components.size()==0&&schedules.size()==0) {
             Log.d(TAG, "onCreateView: all are null ");
             foregroundService.getComponent();
@@ -145,6 +150,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             activityComponent.setError("select a component");
         } else if (autoCompleteTextView2.getText().toString().isEmpty()) {
             activitySchedule.setError("select a schedule ");
+        }else if (textInputEditText.getText().toString().isEmpty()) {
+                textInputEditText.setError("input a schedule value  ");
         }else {
             Activity activity = new Activity();
             activity.activityName = activityNameInputLayout.getEditText().getText().toString();
@@ -158,6 +165,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             activity.scheduleId = Integer.parseInt(String.valueOf(autoCompleteTextView2.getText().toString().charAt(lengths - 1)));
             Log.d(TAG, "confirmInput: ");
             Date date = new Date();
+            activity.schedule_value=Integer.parseInt(textInputEditText.getText().toString());
             activity.issued_date = String.valueOf(date.getTime());
             activity.assigned_to_user="None";
             activity.assigned_to=0;

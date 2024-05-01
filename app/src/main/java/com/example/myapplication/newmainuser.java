@@ -236,7 +236,7 @@ public class newmainuser extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.TIRAMISU){
-            unregisterReceiver(broadcastReceiver);
+            LocalBroadcastManager.getInstance(this.getApplicationContext()).unregisterReceiver(broadcastReceiver);
         }else{
             LocalBroadcastManager.getInstance(this.getApplicationContext()).unregisterReceiver(broadcastReceiver);
         }

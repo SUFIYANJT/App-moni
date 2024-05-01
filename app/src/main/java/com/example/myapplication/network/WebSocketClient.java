@@ -20,6 +20,8 @@ import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.service.MyForegroundService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,7 +56,7 @@ public class WebSocketClient extends WebSocketListener {
     private int retryCount = 0;
     int getActivityCallCount = 0;
 
-    private final String ipAddress= "ws://192.168.43.174:8000/chat/";
+    private final String ipAddress= "ws://192.168.200.121:8000/chat/";
     public WebSocketClient(Context context, MyForegroundService foregroundService){
         this.context=context;
         this.foregroundService=foregroundService;
@@ -87,6 +89,21 @@ public class WebSocketClient extends WebSocketListener {
                 .url(ipAddress+userid)
                 .build();
         webSocket=okHttpClient.newWebSocket(request,this);
+        sendToken();
+    }
+    void sendToken(){
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+            @Override
+            public void onComplete(@NonNull com.google.android.gms.tasks.Task<String> task) {
+                JSONObject jsonObject=new JSONObject();
+                try {
+                    jsonObject.put("token",task.getResult());
+                    webSocket.send(jsonObject.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void getExistingActivity(){
@@ -163,6 +180,7 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_schedule_id",activity.componentId);
                 activityData.put("activity_status_id",activity.activity_satuts_id);
                 activityData.put("assigned_to_user",activity.assigned_to_user);
+                activityData.put("schedule_value",activity.schedule_value);
                 jsonObject.put("activity",activityData);
                 webSocket.send(jsonObject.toString());
             }else{
@@ -191,6 +209,7 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_machine_id",activity.machineId);
                 activityData.put("activity_component_id",activity.componentId);
                 activityData.put("activity_schedule_id",activity.componentId);
+                activityData.put("schedule_value",activity.schedule_value);
                 activityData.put("activity_status_id",activity.activity_satuts_id);
                 activityData.put("activity_assigned_to",activity.assigned_to);
                 activityData.put("assigned_to_user",activity.assigned_to_user);
@@ -221,6 +240,7 @@ public class WebSocketClient extends WebSocketListener {
                 activityData.put("activity_name",activity.activityName);
                 activityData.put("activity_issued_date",activity.issued_date);
                 activityData.put("activity_machine_id",activity.machineId);
+                activityData.put("schedule_value",activity.schedule_value);
                 activityData.put("activity_component_id",activity.componentId);
                 activityData.put("activity_schedule_id",activity.componentId);
                 activityData.put("activity_status_id",activity.activity_satuts_id);
@@ -357,6 +377,8 @@ public class WebSocketClient extends WebSocketListener {
                     int scheduleId = jsonObject.getInt("activity_schedule_id");
                     String activityName = jsonObject.getString("activity_name");
                     String issued_date = jsonObject.getString("activity_issued_date");
+                    String activity_last_report = jsonObject.getString("activity_last_reported");
+                    int scheduleValue = jsonObject.getInt("schedule_value");
                     int activityAssignedId = jsonObject.getInt("assigned_to");
                     String activityAssignUser = jsonObject.getString("assigned_to_user");
                     String ui_activityChange = jsonObject.getString("ui_change");
@@ -376,6 +398,8 @@ public class WebSocketClient extends WebSocketListener {
                     activity.activityCreator = activityCreator;
                     activity.change = activityChange;
                     activity.uiChange = ui_activityChange;
+                    activity.activity_last_reported=activity_last_report;
+                    activity.schedule_value=scheduleValue;
                     Log.d(TAG, "onMessage: functioning activity received " + activityName + " " + activityAssignedId);
                     Log.d(TAG, "onMessage: activity changes " + ui_activityChange + " " + activityChange);
                     Log.d(TAG, "onMessage: activity changes " + ui_activityChange + " " + activityChange);
@@ -404,8 +428,10 @@ public class WebSocketClient extends WebSocketListener {
                 int activityComponentId = messageObject.getInt("activity_component_id");
                 int activityMachineId = messageObject.getInt("activity_machine_id");
                 int activityScheduleId = messageObject.getInt("activity_schedule_id");
+                int scheduleValue = messageObject.getInt("schedule_value");
                 String activityName = messageObject.getString("activity_name");
-                String activityIssuedDate = messageObject.getString("activity_issued_date");
+                String activity_last_report = messageObject.getString("activity_last_reported");
+                String issued_date = messageObject.getString("activity_issued_date");
                 String activityChange = messageObject.getString("change");
                 String activityAssigned= messageObject.getString("assigned_to_user");
                 String ui_activityChange = messageObject.getString("ui_change");
@@ -418,11 +444,13 @@ public class WebSocketClient extends WebSocketListener {
                 activity.componentId=activityComponentId;
                 activity.machineId=activityMachineId;
                 activity.scheduleId=activityScheduleId;
-                activity.issued_date=activityIssuedDate;
                 activity.assigned_to=activityAssignedId;
                 activity.assigned_to_user=activityAssigned;
                 activity.activityCreator=activityCreator;
+                activity.activity_last_reported=activity_last_report;
+                activity.schedule_value=scheduleValue;
                 activity.change=activityChange;
+                activity.issued_date = issued_date;
                 activity.uiChange=ui_activityChange;
                 activity.activityId=activityId;
                 Log.d(TAG, "onMessage: activity changes "+activityAssignedId+" "+activityChange+" "+activity.activityId);
@@ -488,6 +516,8 @@ public class WebSocketClient extends WebSocketListener {
                 e.printStackTrace();
             }
 
+        } else if (text.contains("reports-all")) {
+            foregroundService.setAllReport(text);
         } else if (text.contains("report")) {
             JSONObject jsonObject= null;
             try {
@@ -507,14 +537,14 @@ public class WebSocketClient extends WebSocketListener {
                     Log.d(TAG, "onMessage: imageArray..."+imagePath.replace("\"",""));
                 }
                 for (int i = 0; i < audioArray.length(); i++) {
-                    String audioPath = imageArray.getString(i);
+                    String audioPath = audioArray.getString(i);
                     audios[i]=audioPath;
-                    Log.d(TAG, "onMessage: imageArray..."+audioPath.replace("\"",""));
+                    Log.d(TAG, "onMessage: audioArray..."+audioPath.replace("\"",""));
                 }
                 for (int i = 0; i < textArray.length(); i++) {
-                    String textPath = imageArray.getString(i);
+                    String textPath = textArray.getString(i);
                     texts[i]=textPath;
-                    Log.d(TAG, "onMessage: imageArray..."+textPath.replace("\"",""));
+                    Log.d(TAG, "onMessage: textArray..."+textPath.replace("\"",""));
                 }
                 Log.d(TAG, "onMessage: reportTransfer is..."+newWindow);
                 newWindow.setAudio(audios);
@@ -742,5 +772,18 @@ public class WebSocketClient extends WebSocketListener {
             e.printStackTrace();
         }
         webSocket.send(jsonObject.toString());
+    }
+
+    public void getAllReports() {
+        try {
+            User user=UserPreferences.getUser(context.getApplicationContext());
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("user_id",user.getUser_id());
+            jsonObject.put("username",user.getUsername());
+            jsonObject.put("report-get",-1);
+            webSocket.send(jsonObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

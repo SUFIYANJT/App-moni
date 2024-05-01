@@ -65,7 +65,9 @@ public class RecyclerReport extends RecyclerView.Adapter<RecyclerReport.ItemHold
             holder.textView.setVisibility(View.GONE);
             holder.seekBar.setVisibility(View.GONE);
             holder.imageView.setVisibility(View.GONE);
+            holder.materialTextView.setText(submitHolders.get(position).getTextView());
         }
+
         holder.imageView.setOnClickListener(v -> {
             Log.d(TAG, "onBindViewHolder: isPlaying "+submitHolders.get(position).isPlaying());
             submitHolders.get(position).setPlaying(true);
@@ -90,11 +92,9 @@ public class RecyclerReport extends RecyclerView.Adapter<RecyclerReport.ItemHold
                 viewIntent.setDataAndType(submitHolders.get(position).getImageFile(), "image/*");
                 viewIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 if (viewIntent.resolveActivity(activity.getPackageManager()) != null) {
-                    // Start the activity if there is an app available to handle the intent
                     activity.startActivity(viewIntent);
                 } else {
-                    // Handle the case where no app is available to view the image
-                    // You may display a toast or a dialog to inform the user
+
                 }
             });
             holder.textView.setText(submitHolders.get(position).getTextView());
@@ -131,6 +131,7 @@ public class RecyclerReport extends RecyclerView.Adapter<RecyclerReport.ItemHold
                 Runnable runnable = new Runnable() {
                     @Override
                     public void run() {
+                        Log.d(TAG, "run: audio playing....");
                         if(mediaPlayer != null){
                             int currentPosition = mediaPlayer.getCurrentPosition();
                             seekBar.setProgress(currentPosition);
@@ -139,9 +140,11 @@ public class RecyclerReport extends RecyclerView.Adapter<RecyclerReport.ItemHold
                                 if(!mediaPlayer.isPlaying()){
                                     submitHolders.get(position).setPlaying(false);
                                 }
+                            }else{
+                                handler.postDelayed(this, 100);
                             }
                         }
-                        handler.postDelayed(this, 100);
+
                     }
                 };
                 handler.postDelayed(runnable,10);

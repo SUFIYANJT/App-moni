@@ -33,6 +33,7 @@ import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.service.MyForegroundService;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -103,7 +104,13 @@ public class UsercardWindow extends AppCompatActivity  {
         MaterialButton attachmentButton = findViewById(R.id.attachmentButton);
         seekBar=findViewById(R.id.progress_linear_bar);
         seekBar.setOnClickListener(v->{
-            myForegroundService.sendReport(submitHolders,task.getTask_id());
+            if(!submitHolders.isEmpty()) {
+                seekBar.setClickable(false);
+                Snackbar.make(v, "Sending report to server...", Snackbar.LENGTH_SHORT).show();
+                myForegroundService.sendReport(submitHolders, task.getTask_id());
+            }else{
+                Snackbar.make(v, "No report to send...", Snackbar.LENGTH_SHORT).show();
+            }
         });
         sendButton.setOnClickListener(v -> sendMessage());
         voiceMessageButton.setOnClickListener(v -> recordVoiceMessage());
@@ -121,7 +128,7 @@ public class UsercardWindow extends AppCompatActivity  {
             submitHolder.setMode(3);
             submitHolders.add(submitHolder);
             messageInputEditText.setText("");
-
+            recyclerReport.notifyItemInserted(submitHolders.size());
         }
     }
     @Override

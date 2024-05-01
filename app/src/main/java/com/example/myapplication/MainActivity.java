@@ -41,6 +41,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 public class MainActivity extends AppCompatActivity {
@@ -89,9 +90,11 @@ public class MainActivity extends AppCompatActivity {
             String change = null;
             if (activity != null) {
                 change = activity.change;
+                activity.remaining=activity.dateInInt();
             }
             String uiChange = null;
             if (activity != null) {
+                activity.remaining=activity.dateInInt();
                 uiChange = activity.uiChange;
             }
             Log.d(TAG, "onReceive: Change state: " + change);
@@ -205,11 +208,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (activity.activity_satuts_id == 3) {
                 if (change != null && change.equals("create")) {
                     PendingActivities.add(activity);
-                    Log.d(TAG, "onReceive: Added new activity: " + activity.activityName);
+                    Log.d(TAG, "onReceive: Added new activity: pending" + activity.activityName);
                 } else if (change != null && change.equals("update")) {
                     int i = 0;
                     for (Activity act : PendingActivities) {
-                        Log.d(TAG, "onReceive: activity id checking " + act.activityId + " " + activity.activityId);
+                        Log.d(TAG, "onReceive: activity id checking pending" + act.activityId + " " + activity.activityId);
                         if (activity != null && act.activityId == activity.activityId) {
                             PendingActivities.set(i, activity);
                             Log.d(TAG, "onReceive: Updated activity: " + activity.activityName);
@@ -217,9 +220,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                         i++;
                     }
-                    Log.d(TAG, "onReceive: ExistingActivities size: " + PendingActivities.size() + ", i: " + i);
-                    itemModel.setPendingactivityMutableLiveData(PendingActivities);
+                    Log.d(TAG, "onReceive: pendingActivities size: " + PendingActivities.size() + ", i: " + i);
+
                 }
+                itemModel.setPendingactivityMutableLiveData(PendingActivities);
             } else if (activity.activity_satuts_id == 4) {
                 if (change != null && change.equals("create")) {
                     ReviewActivities.add(activity);
@@ -259,6 +263,8 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle("Tranvancore Cements");
         setSupportActionBar(toolbar);
         Log.d(TAG, "onCreate: foreground value is..."+foreground);
+
+
         fab.setOnClickListener(view -> {
             bottomSheetFragment = new BottomSheetFragment(foreground);
             Log.d(TAG, "onCreate: clicked the to open/close the bottom sheet fragment ");
@@ -390,7 +396,13 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             // Handle Item 3 selection
             return true;
-        } else {
+        }
+        else if (id == R.id.history) {
+            Intent intent = new Intent(this, HistoryActivity.class);
+            startActivity(intent);
+            // Handle Item 3 selection
+            return true;
+        }else {
             return super.onOptionsItemSelected(item);
         }
 

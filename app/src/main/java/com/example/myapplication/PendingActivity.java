@@ -49,16 +49,39 @@ public class PendingActivity extends Fragment  implements SearchableFragment{
         itemModel.getPendingactivityMutableLiveData().observe(getViewLifecycleOwner(), newData -> {
             activities.clear();
             activities.addAll(newData);
-            Log.d(TAG, "onCreateView: "+newData.size());
+            Log.d(TAG, "onCreateView: pending activity"+newData.size());
             customAdapter.notifyDataSetChanged();
+        });
+        itemModel.getIntegerMutableLiveData2().observe(getViewLifecycleOwner(),integer -> {
+            if(activities.size()>0) {
+                Activity activity = activities.get(integer);
+                activity.change = "create";
+                activity.uiChange = "update";
+                activities.remove(activities.get(integer));
+                customAdapter.notifyDataSetChanged();
+            }
         });
         FloatingActionButton fab = requireActivity().findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewPen);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        customAdapter = new CustomAdapter(activities, true, false,false);
+        customAdapter = new CustomAdapter(view.getContext(),activities, true, false,false);
         recyclerView.setAdapter(customAdapter);
         setHasOptionsMenu(true);
+        customAdapter.setOnItemClickListener(new CustomAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Activity item, int position) {
+                Log.d(TAG, "onItemClick: called in the pending ");
+                MyBottomSheetFragmentExixting bottomSheetFragment = new MyBottomSheetFragmentExixting(item,activities,position,foregroundService);
+                bottomSheetFragment.show(getParentFragmentManager(), bottomSheetFragment.getTag());
+            }
+            @Override
+            public void onItemClick(Activity item, int position, String message) {
+                Log.d(TAG, "onItemClick: called in pending");
+                BottomSheetDialogFragmentIssued bottomSheetDialogFragmentIssued=new BottomSheetDialogFragmentIssued(item,position,message,foregroundService);
+                bottomSheetDialogFragmentIssued.show(getParentFragmentManager(),bottomSheetDialogFragmentIssued.getTag());
+            }
+        });
 
         return view;
     }

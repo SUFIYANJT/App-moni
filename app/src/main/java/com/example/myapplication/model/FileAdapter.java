@@ -7,13 +7,17 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,17 +27,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.myapplication.R;
 import com.example.myapplication.ReportTransfer;
 import com.example.myapplication.Support.FileData;
 import com.example.myapplication.Support.ImageSearchHelper;
 import com.example.myapplication.Support.MediaStoreHelper;
 import com.example.myapplication.service.MyForegroundService;
+import com.google.android.gms.common.GoogleApiAvailabilityLight;
 import com.google.android.material.textview.MaterialTextView;
+import com.google.android.material.transition.Hold;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -44,6 +52,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
     MyForegroundService foregroundService;
     Queue<Integer> queue=new LinkedList<>();
     ViewHolder viewHolder;
+    Handler handler = new Handler();
     int fileSize=0;
     int currentFileSize=0;
     android.app.Activity context;
@@ -61,24 +70,51 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
 
     @Override
     public void onBindViewHolder(@NonNull FileAdapter.ViewHolder holder, int position) {
-        holder.imageView.setVisibility(View.VISIBLE);
+        holder.imageView.setVisibility(View.GONE);
+        holder.image.setVisibility(View.GONE);
         holder.seekBar.setVisibility(View.INVISIBLE);
         Glide.with(context).load(R.drawable.baseline_arrow_downward_24).into(holder.imageView);
         holder.textView.setVisibility(View.GONE);
-        holder.button.setVisibility(View.INVISIBLE);
+        holder.button.setVisibility(View.GONE);
+        if(fileDatas.get(position).getType().equals("text")){
+            holder.layout.setVisibility(View.GONE);
+            holder.image.setVisibility(View.GONE);
+        } else if (fileDatas.get(position).getType().equals("audio")) {
+            Log.d(TAG, "onBindViewHolder: audio part is active ");
+            holder.layout.setVisibility(View.VISIBLE);
+            holder.image.setVisibility(View.GONE);
+        } else if (fileDatas.get(position).getType().equals("image")) {
+            holder.layout.setVisibility(View.GONE);
+            holder.image.setVisibility(View.VISIBLE);
+        }
         String[] spilt=fileDatas.get(position).getFile().split("/");
         holder.materialTextView.setText(spilt[spilt.length-1]);
         ContentResolver contentResolver = context.getContentResolver();
         Uri imageUri = ImageSearchHelper.searchForImage(contentResolver, spilt[spilt.length-1]);
-        if(imageUri!=null){
+        Log.d(TAG, "onBindViewHolder: file name is "+spilt[spilt.length-1]+imageUri);
+        File file=new File(context.getFilesDir(),spilt[spilt.length-1]);
+        if(file.exists()){
             holder.imageView.setVisibility(View.GONE);
-            holder.button.setVisibility(View.VISIBLE);
-            Log.d(TAG, "onBindViewHolder: "+imageUri);
+            holder.image.setVisibility(View.VISIBLE);
+            holder.layout.setVisibility(View.GONE);
+          //  holder.button.setVisibility(View.VISIBLE);
+            RequestOptions requestOptions = new RequestOptions()
+                    .fitCenter();
+            Glide.with(context)
+                    .load(file)
+                    .apply(requestOptions)
+                    .into(holder.image);
+            Log.d(TAG, "onBindViewHolder: IMAGE URL"+imageUri);
+        }else{
+            Log.d(TAG, "onBindViewHolder: image uri is null");
         }
         Log.d(TAG, "onBindViewHolder: item name "+holder.materialTextView.getText()+" "+ fileDatas.get(position).getFile());
         Log.d(TAG, "onBindViewHolder: clicked in item"+fileDatas.get(position).getFileSize()+" "+fileDatas.get(position).getDownloaded());
         if(fileDatas.get(position).getType().equals("audio")){
             holder.seekBar.setVisibility(View.VISIBLE);
+            holder.image.setVisibility(View.GONE);
+            holder.imageView.setVisibility(View.VISIBLE);
+            holder.layout.setVisibility(View.VISIBLE);
         }
         holder.progressBar.setVisibility(View.INVISIBLE);
         holder.imageView.setOnClickListener(v -> {
@@ -95,18 +131,35 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
             }
         });
         if(fileDatas.get(position).getDownloaded()==fileDatas.get(position).getFileSize()){
-            holder.imageView.setVisibility(View.GONE);
-            Log.d(TAG, "onBindViewHolder: "+fileDatas.get(position).getDownloadFile().length()+" "+fileDatas.get(position).getFileSize());
-            holder.button.setVisibility(View.VISIBLE);
-
-        }
-        holder.button.setOnClickListener(v -> {
-            Log.d(TAG, "onBindViewHolder: clicked to view the image ....."+imageUri);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(imageUri, "image/*");
-            if (intent.resolveActivity(context.getPackageManager()) != null) {
-                context.startActivity(intent);
+            if(fileDatas.get(position).getType().equals("image")) {
+                holder.imageView.setVisibility(View.GONE);
+                Log.d(TAG, "onBindViewHolder: " + fileDatas.get(position).getDownloadFile().length() + " " + fileDatas.get(position).getFileSize());
+                holder.image.setVisibility(View.VISIBLE);
+                holder.layout.setVisibility(View.GONE);
+                Glide.with(context)
+                        .load(file)
+                        .centerCrop().into(holder.image);
+               // File file1=new File(context.getFilesDir(),)
+                Log.d(TAG, "onBindViewHolder: IMAGE URL" );
+            } else if (fileDatas.get(position).getType().equals("audio")) {
+                Glide.with(context).load(R.drawable.baseline_play_arrow_24).into(holder.imageView);
+                holder.imageView.setOnClickListener(v -> {
+                    fileDatas.get(position).setPlaying(true);
+                    AudioPlay(fileDatas.get(position).mediaPlayer,new File(context.getFilesDir()+"/"+spilt[spilt.length-1]),holder.seekBar,0,position);
+                });
             }
+        }
+        holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    AudioPlay(fileDatas.get(position).mediaPlayer,new File(context.getFilesDir()+"/"+spilt[spilt.length-1]),holder.seekBar,0,position);
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
     }
     public void getFile(int position){
@@ -163,6 +216,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
                         fileDatas.get(queue.element()).setDownloadFile(file);
                         File imageFile = new File(context.getFilesDir(), dismantle[dismantle.length-1]);
                         Uri imageUri = MediaStoreHelper.saveImageToMediaStore(context, imageFile);
+                        Log.d(TAG, "setFileData: imageuri is made "+imageUri);
                         queue.poll();
                         if(!queue.isEmpty()) {
                             Log.d(TAG, "setFileData: queue is not empty ");
@@ -187,6 +241,42 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
         }
         Log.d(TAG, "fileSize: checking queue "+queue.isEmpty());
     }
+    public void AudioPlay(MediaPlayer mediaPlayer, File audioFile , SeekBar seekBar, int seek, int position){
+        if (audioFile != null && audioFile.exists()) {
+            try {
+                mediaPlayer.reset();
+                mediaPlayer.setDataSource(audioFile.getAbsolutePath());
+                mediaPlayer.prepare();
+                seekBar.setMax(mediaPlayer.getDuration());
+                mediaPlayer.seekTo(seek);
+                mediaPlayer.setVolume(1.0f,1.0f);
+                mediaPlayer.start();
+
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "run: playing audio ");
+                        int currentPosition = mediaPlayer.getCurrentPosition();
+                        seekBar.setProgress(currentPosition);
+                        if(currentPosition==mediaPlayer.getDuration()){
+                            seekBar.setProgress(0);
+                            if(!mediaPlayer.isPlaying()){
+                                fileDatas.get(position).setPlaying(false);
+                            }
+                        }else {
+                            handler.postDelayed(this, 100);
+                        }
+                    }
+                };
+                handler.postDelayed(runnable,10);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(context, "Failed to play recording", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(context, "No recording available to play", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     static class ViewHolder extends RecyclerView.ViewHolder{
         MaterialTextView materialTextView;
@@ -194,6 +284,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
         TextView textView;
         ImageButton imageView;
         ProgressBar progressBar;
+        ImageView image;
+        LinearLayout layout;
         Button button;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -203,6 +295,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> im
             imageView=itemView.findViewById(R.id.playAndPause);
             progressBar=itemView.findViewById(R.id.progressBar);
             button=itemView.findViewById(R.id.view);
+            image=itemView.findViewById(R.id.image);
+            layout=itemView.findViewById(R.id.linear);
         }
     }
 }

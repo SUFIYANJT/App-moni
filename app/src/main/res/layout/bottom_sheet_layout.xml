@@ -19,7 +19,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Activity name" />
+            android:hint="@string/activity_name" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -33,7 +33,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Description" />
+            android:hint="@string/description" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -43,7 +43,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Machine"
+        android:hint="@string/select_machine"
         android:layout_marginBottom="16dp">
 
         <AutoCompleteTextView
@@ -60,7 +60,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select Compound">
+        android:hint="@string/select_compound">
 
         <AutoCompleteTextView
             android:id="@+id/autoCompleteTextView1"
@@ -76,7 +76,7 @@
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Select schedule">
+        android:hint="@string/select_schedule">
 
     <AutoCompleteTextView
         android:id="@+id/autoCompleteTextView2"
@@ -84,14 +84,26 @@
         android:layout_height="wrap_content"
         android:inputType="none"
         android:layout_marginBottom="16dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
 
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputDropdown3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/enter_a_schedule_value">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:id="@+id/autoCompleteTextView3"/>
+    </com.google.android.material.textfield.TextInputLayout>
     <!-- Confirm Button -->
     <Button
         android:id="@+id/confirmButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="confirmInput"
-        android:text="Create Activity" />
+        android:text="@string/create_activity" />
 
 </LinearLayout>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- notification_layout.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:minHeight="50dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/now"
+        android:paddingTop="10dp"
+        android:paddingLeft="40px"
+        android:textSize="10sp"/>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/notification_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Notification Title"
+            android:textSize="15sp"
+            android:textColor="@android:color/black"
+            android:paddingTop="10dp"
+            android:paddingStart="20dp"
+            android:fontFamily="@font/gr"/>
+
+        <TextView
+            android:id="@+id/creator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="admin"
+            android:textSize="15sp"
+            android:paddingTop="10dp"
+            android:paddingEnd="20dp"/>
+    </LinearLayout>
+
+</LinearLayout>
+
+    <TextView
+        android:id="@+id/notification_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Notification Message"
+        android:paddingStart="20dp"
+        android:fontFamily="@font/gr"
+        android:textColor="@android:color/black"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:paddingBottom="20sp"
+        app:layout_constraintTop_toBottomOf="@+id/notification_title"
+        android:textSize="14sp" />
+
+</LinearLayout>

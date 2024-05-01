@@ -7,21 +7,31 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.network.WebSocketClient;
 import com.example.myapplication.service.MyForegroundService;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -80,40 +90,60 @@ public class LoginActivity extends AppCompatActivity {
             }
         }
     };
-
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // FCM SDK (and your app) can post notifications.
+                } else {
+                    // TODO: Inform user that that your app will not show notifications.
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        askNotificationPermission();
         User user=UserPreferences.getUser(getApplicationContext());
+        FirebaseMessaging.getInstance().subscribeToTopic("user")
+                .addOnCompleteListener(task -> {
+                    String msg = "Subscribed";
+                    if (!task.isSuccessful()) {
+                        msg = "Subscribe failed";
+                    }
+                    Log.d(TAG, msg);
+                    Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+                });
         if(user!=null){
             Log.d(TAG, "onCreate: stopping login because user found ");
             finish();
             if ("A".equals(user.getUsermode())) {
+                FirebaseMessaging.getInstance().subscribeToTopic("admin")
+                        .addOnCompleteListener(task -> {
+                            String msg = "Subscribed";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        });
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
             } else if ("B".equals(user.getUsermode())) {
+                FirebaseMessaging.getInstance().subscribeToTopic("inspector")
+                        .addOnCompleteListener(task -> {
+                            String msg = "Subscribed";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(LoginActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        });
                 startActivity(new Intent(LoginActivity.this, newmainuser.class));
             }
         }else {
-           /* serviceIntent = new Intent(this, MyForegroundService.class);
-            IntentFilter filter = new IntentFilter("com.example.ACTION_SEND_DATA");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                registerReceiver(broadcastReceiver, filter);
-            }*/
             textInputUsername = findViewById(R.id.text_input_username);
             textInputPassword = findViewById(R.id.text_input_password);
             buttonLogin = findViewById(R.id.button_login);
-           /* if (isServiceRunning(MyForegroundService.class)) {
-                ContextCompat.startForegroundService(LoginActivity.this, serviceIntent);
-                bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
-                Log.d(TAG, "onCreate: starting the service because no service found ");
-            } else {
-                Log.d(TAG, "onCreate: service is not running ");
-                ConstraintLayout root = findViewById(R.id.parent);
-                Snackbar.make(root, "service already running ", Snackbar.LENGTH_SHORT).show();
-            }*/
             buttonLogin.setOnClickListener(v -> {
                 // Retrieve input values
                 String username = textInputUsername.getEditText().getText().toString().trim();
@@ -129,6 +159,33 @@ public class LoginActivity extends AppCompatActivity {
                     webSocketClient.Auth(username,password);
                 }
             });
+        }
+    }
+    private void askNotificationPermission() {
+        // This is only necessary for API level >= 33 (TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED) {
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(task -> {
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                                return;
+                            }
+                            // Get new FCM registration token
+                            String token = task.getResult();
+                            // Log and toast
+                            Log.d(TAG, token);
+                            Toast.makeText(LoginActivity.this, token, Toast.LENGTH_SHORT).show();
+                        });
+
+                // FCM SDK (and your app) can post notifications.
+            } else if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+
+            } else {
+                // Directly ask for the permission
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
         }
     }
     public void NextPage(User user){

@@ -38,6 +38,7 @@ import com.example.myapplication.Support.User;
 import com.example.myapplication.Support.UserPreferences;
 import com.example.myapplication.model.ItemModel;
 import com.example.myapplication.model.MyBroadcastReceiver;
+import com.example.myapplication.model.ReportInterface;
 import com.example.myapplication.network.WebSocketClient;
 
 import java.io.Serializable;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 public class MyForegroundService extends Service implements Serializable {
     public static MyForegroundService foregroundService;
     private FragmentActivity activity;
+    public ReportInterface reportInterface;
     public User user = null;
     private ArrayList<User> arrayList;
     private static final int NOTIFICATION_ID = 123;
@@ -158,7 +160,7 @@ public class MyForegroundService extends Service implements Serializable {
             Intent notificationIntent = new Intent(this, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "channel_id")
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "my_service")
                     .setContentTitle("Foreground Service")
                     .setContentText("This is a foreground service")
                     .setSmallIcon(R.mipmap.ic_launcher)
@@ -255,11 +257,9 @@ public class MyForegroundService extends Service implements Serializable {
         manager.createNotificationChannel(chan);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
         Notification notification = notificationBuilder.setOngoing(true)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setContentTitle("App is running in background")
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
-                .setContentIntent(resultPendingIntent) //intent
                 .build();
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
@@ -304,6 +304,14 @@ public class MyForegroundService extends Service implements Serializable {
     }
     public void fileSize(int size){
         reportTransfer.fileSize(size);
+    }
+    public void getAllReports(ReportInterface reportInterface) {
+        this.reportInterface=reportInterface;
+        webSocketClient.getAllReports();
+    }
+
+    public void setAllReport(String text) {
+        reportInterface.setReports(text);
     }
 
     public class MyBinder extends Binder {

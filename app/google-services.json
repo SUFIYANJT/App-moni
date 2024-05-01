@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "225185805012",
+    "project_id": "travancore-cement",
+    "storage_bucket": "travancore-cement.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225185805012:android:e7f15ca02bfbcf21b88141",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxl8-_yz0G4Cp-BoMtAV0osaeVZwYzlhc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

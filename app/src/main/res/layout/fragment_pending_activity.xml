@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     style="@style/Cantainer"
-    android:padding="16dp"
+    android:padding="6dp"
     tools:context=".PendingActivity">
 
     <androidx.recyclerview.widget.RecyclerView

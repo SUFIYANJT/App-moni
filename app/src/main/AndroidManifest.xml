@@ -1,35 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.myapplication">
-
     <!-- Permissions should be declared outside of the application tag -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.POST_NOTIFICATIONS"
+        tools:node="remove" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" /> <!-- Declaration for camera hardware feature -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
-
-
-
-    <!-- Declaration for camera hardware feature -->
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.mic" />
-
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <!-- Declaration for camera hardware feature -->
-    <uses-feature android:name="android.hardware.microphone" android:required="false" />
-
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Declaration for camera hardware feature -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
-        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -37,12 +37,36 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.MyApplication"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_launcher_foreground" />
+        <!--
+ Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/cardBackgroundColor" />
+
         <service
             android:name=".service.MyForegroundService"
             android:foregroundServiceType="connectedDevice"
-            tools:ignore="ForegroundServicePermission">
-
+            tools:ignore="ForegroundServicePermission" />
+        <service
+            android:name=".service.MessageService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
         </service>
 
         <activity
@@ -51,44 +75,44 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".MainActivity"
-            android:exported="true"
+        <activity
+            android:name=".MainActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize"
-            android:launchMode="singleTop"
-            >
+            android:exported="true"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".NewWindow"
-            android:configChanges="orientation|screenSize|smallestScreenSize"
-            />
-        <activity android:name=".newmainuser"
-            android:configChanges="orientation|screenSize|smallestScreenSize"
-            />
+        <activity
+            android:name=".NewWindow"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
+        <activity
+            android:name=".newmainuser"
+            android:configChanges="orientation|screenSize|smallestScreenSize" /> <!-- Correct declaration for UsercardWindow activity -->
+        <activity
+            android:name=".UsercardWindow"
+            android:configChanges="orientation|screenSize|smallestScreenSize" />
 
-        <!-- Correct declaration for UsercardWindow activity -->
-        <activity android:name=".UsercardWindow"
-            android:configChanges="orientation|screenSize|smallestScreenSize"/>
-        <receiver android:name=".model.MyBroadcastReceiver"
+        <receiver
+            android:name=".model.MyBroadcastReceiver"
             android:exported="true"
             tools:ignore="Instantiatable">
             <intent-filter>
                 <action android:name="com.example.ACTION_SEND_DATA" />
             </intent-filter>
         </receiver>
-
-
     </application>
 
 </manifest>

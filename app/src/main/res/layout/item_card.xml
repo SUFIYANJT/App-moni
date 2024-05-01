@@ -93,6 +93,11 @@
                   android:textSize="10sp"
                   android:id="@+id/text_assign_by"
                   android:layout_height="wrap_content"/>
+              <TextView
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:fontFamily="@font/gr"
+                  android:id="@+id/timeRemaining"/>
           </LinearLayout>
       </LinearLayout>
     </LinearLayout>

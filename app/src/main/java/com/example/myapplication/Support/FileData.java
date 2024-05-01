@@ -1,5 +1,7 @@
 package com.example.myapplication.Support;
 
+import android.media.MediaPlayer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -10,6 +12,8 @@ public class FileData {
     private int FileSize=100;
     private int downloaded;
     private File downloadFile;
+    private boolean isPlaying=false;
+    public MediaPlayer mediaPlayer=new MediaPlayer();
     private FileOutputStream fileOutputStream;
     public String getFile() {
         return file;
@@ -67,5 +71,14 @@ public class FileData {
 
     public void setFileOutputStream(FileOutputStream fileOutputStream) {
         this.fileOutputStream = fileOutputStream;
+    }
+
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
     }
 }
